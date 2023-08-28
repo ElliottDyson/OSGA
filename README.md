@@ -15,3 +15,4 @@ location = {San Francisco, CA, USA},
 series = {UIST '23}
 }
 ```
+Update utils.py within reverie with the appropriate http call, whether it be a public I.P address from the Google Collab instance, or http://localhost:8000/v1 if hosting the model using llama-cpp-python [server] locally.
