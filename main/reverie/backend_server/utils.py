@@ -1,5 +1,4 @@
-# Copy and paste your OpenAI API Key
-openai_api_key = "something"
+openai_api_key = "something" #keep as is, the only reason it isn't "", is because we need to return "some" string.
 """ngrok for public IP addresses of externally hosted notebook instances - localhost:8000 for locally hosted instances"""
 base_api_url = "http://e3c2-35-203-140-86.ngrok-free.app/v1"   #   "https://YOUR_NEW_API_ENDPOINT/v1" must end in /v1 due to the nature of llama-cpp-python
 
