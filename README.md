@@ -32,8 +32,10 @@ Tested on Python 3.11. (Note: Please check for backward compatibility.)
 
 Update `utils.py` within reverie with the appropriate HTTP call. For example:
 
-# Update this line with your HTTP call
+Update this line with your HTTP call:
 base_api_url = "your_http_call_here"
+e.g.
+base_api_url = HTTP://localhost:8000/v1 #For hosting the model on the same system that is communicating with the model.
 
 ## Community
 
