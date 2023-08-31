@@ -1,4 +1,6 @@
-# Prompt functions (the main functions that are called to interact with LLM)
+# A Breakdown For Methods of Prompting
+
+Prompt functions (the main functions that are called to interact with LLM)
 
 Prompt (create) input functions (functions to generate/gather information to send to LLM)
 
