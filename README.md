@@ -1,9 +1,9 @@
 # OSGA (Open-Source Generative Agents)
 
-Open-Source Generative Agents (OSGA) is a community-driven fork of 'Generative Agents.' Our mission is to:
+Open-Source Generative Agents (OSGA) is a community-driven derivative of 'Generative Agents.' Our mission is to:
 
 - Enable compatibility with open-source Large Language Models.
-- Enhance performance and adaptability.
+- Enhance performance, methods, and adaptability.
 - Introduce new, optional features.
 - Provide a centralised repository for OSGA-related projects.
 
