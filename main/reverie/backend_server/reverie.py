@@ -391,6 +391,9 @@ class ReverieServer:
           movements["meta"]["curr_time"] = (self.curr_time 
                                              .strftime("%B %d, %Y, %H:%M:%S"))
 
+          # Ensure the "movement" directory exists
+          create_folder_if_not_there(f"{sim_folder}/movement") # Function from 'global_methods.py'
+
           # We then write the personas' movements to a file that will be sent 
           # to the frontend server. 
           # Example json output: 
@@ -398,7 +401,7 @@ class ReverieServer:
           #  "persona": {"Klaus Mueller": {"movement": [38, 12]}}, 
           #  "meta": {curr_time: <datetime>}}
           curr_move_file = f"{sim_folder}/movement/{self.step}.json"
-          with open(curr_move_file, "w") as outfile: 
+          with open(curr_move_file, "w") as outfile: # "w" means if file does not exist, create it
             outfile.write(json.dumps(movements, indent=2))
 
           # After this cycle, the world takes one step forward, and the 
