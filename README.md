@@ -42,11 +42,15 @@ base_api_url = HTTP://localhost:8000/v1 #For hosting the model on the same syste
 Run the "install requirements.bat" file to install the required Python dependencies for running the server.
 
 Run "start.bat" to start the servers up (frontend and backend). 
-When it asks for you to enter the name of a forked simulation to continue from, enter the name of one of the simulations (name of one of the folders) from OSGA\main\environment\frontend_server\storage. 
-This will give you a starting point to run your simulation.
-Follow this up with whatever you want your fork to be called (and saved as in the storage directory)
-You can then use run 6000 (or any other integer, divide this value by 10 and you get the number of in-game seconds that the simulation is running for)
-If it pauses and you want to run it further, you can simply continue the simulation with a new fork of your old version (by closing the old frontend and backend, then loading new ones).
+
+  When it asks for you to enter the name of a forked simulation to continue from, enter the name of one of the simulations (name of one of the folders) from OSGA\main\environment\frontend_server\storage. 
+  This will give you a starting point to run your simulation.
+
+  Follow this up with whatever you want your fork to be called (and saved as in the storage directory)
+
+  You can then use run 6000 (or any other integer, divide this value by 10 and you get the number of in-game seconds that the simulation is running for)
+  
+  If it pauses and you want to run it further, you can simply continue the simulation with a new fork of your old version (by closing the old frontend and backend, then loading new ones).
 
 Be patient! It might take a while until the front_end loads up properly, this is because the first actions have to be completed by the personas first!
 
