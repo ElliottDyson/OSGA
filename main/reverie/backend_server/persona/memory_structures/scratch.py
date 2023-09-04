@@ -1,5 +1,6 @@
 """
-Author: Joon Sung Park (joonspk@stanford.edu)
+Original Author: Joon Sung Park (joonspk@stanford.edu)
+Edited by: Community, Community Organised by: Elliott Dyson (elliottdysondesigns@gmail.com)
 
 File: scratch.py
 Description: Defines the short-term memory module for generative agents.
@@ -9,10 +10,31 @@ import json
 import sys
 sys.path.append('../../')
 
+#Logging Setup
+import logging
+from utils import *
+
+debug_level = debug_scratch # Set in utils.py
+logging.basicConfig(level=debug_level)
+"""
+logging.debug('This is a debug message.')
+logging.info('This is an info message.')
+logging.warning('This is a warning message.')
+logging.error('This is an error message.')
+logging.critical('This is a critical message.')
+"""
+#Logging Setup
+
 from global_methods import *
 
 class Scratch: 
   def __init__(self, f_saved): 
+    logging.info("Initialising Scratch object.")
+
+    if f_saved is None:
+        logging.critical("No file provided for initializing the Scratch object.")
+        raise ValueError("File for initialization is required.")
+
     # PERSONA HYPERPARAMETERS
     # <vision_r> denotes the number of tiles that the persona can see around 
     # them. 
@@ -159,6 +181,8 @@ class Scratch:
     self.planned_path = []
 
     if check_if_file_exists(f_saved): 
+      logging.info(f"File {f_saved} exists, loading Scratch object from it.")
+
       # If we have a bootstrap file, load that here. 
       scratch_load = json.load(open(f_saved))
 
@@ -233,81 +257,91 @@ class Scratch:
       self.act_path_set = scratch_load["act_path_set"]
       self.planned_path = scratch_load["planned_path"]
 
+    logging.debug("Scratch object initialised")
+
 
   def save(self, out_json):
-    """
-    Save persona's scratch. 
+    try:
+      """
+      Save persona's scratch. 
 
-    INPUT: 
-      out_json: The file where we wil be saving our persona's state. 
-    OUTPUT: 
-      None
-    """
-    scratch = dict() 
-    scratch["vision_r"] = self.vision_r
-    scratch["att_bandwidth"] = self.att_bandwidth
-    scratch["retention"] = self.retention
+      INPUT: 
+        out_json: The file where we wil be saving our persona's state. 
+      OUTPUT: 
+        None
+      """
+      logging.info(f"Scratch object is being saved to {out_json}.")
 
-    scratch["curr_time"] = self.curr_time.strftime("%B %d, %Y, %H:%M:%S")
-    scratch["curr_tile"] = self.curr_tile
-    scratch["daily_plan_req"] = self.daily_plan_req
+      scratch = dict() 
+      scratch["vision_r"] = self.vision_r
+      scratch["att_bandwidth"] = self.att_bandwidth
+      scratch["retention"] = self.retention
 
-    scratch["name"] = self.name
-    scratch["first_name"] = self.first_name
-    scratch["last_name"] = self.last_name
-    scratch["age"] = self.age
-    scratch["innate"] = self.innate
-    scratch["learned"] = self.learned
-    scratch["currently"] = self.currently
-    scratch["lifestyle"] = self.lifestyle
-    scratch["living_area"] = self.living_area
+      scratch["curr_time"] = self.curr_time.strftime("%B %d, %Y, %H:%M:%S")
+      scratch["curr_tile"] = self.curr_tile
+      scratch["daily_plan_req"] = self.daily_plan_req
 
-    scratch["concept_forget"] = self.concept_forget
-    scratch["daily_reflection_time"] = self.daily_reflection_time
-    scratch["daily_reflection_size"] = self.daily_reflection_size
-    scratch["overlap_reflect_th"] = self.overlap_reflect_th
-    scratch["kw_strg_event_reflect_th"] = self.kw_strg_event_reflect_th
-    scratch["kw_strg_thought_reflect_th"] = self.kw_strg_thought_reflect_th
+      scratch["name"] = self.name
+      scratch["first_name"] = self.first_name
+      scratch["last_name"] = self.last_name
+      scratch["age"] = self.age
+      scratch["innate"] = self.innate
+      scratch["learned"] = self.learned
+      scratch["currently"] = self.currently
+      scratch["lifestyle"] = self.lifestyle
+      scratch["living_area"] = self.living_area
 
-    scratch["recency_w"] = self.recency_w
-    scratch["relevance_w"] = self.relevance_w
-    scratch["importance_w"] = self.importance_w
-    scratch["recency_decay"] = self.recency_decay
-    scratch["importance_trigger_max"] = self.importance_trigger_max
-    scratch["importance_trigger_curr"] = self.importance_trigger_curr
-    scratch["importance_ele_n"] = self.importance_ele_n
-    scratch["thought_count"] = self.thought_count
+      scratch["concept_forget"] = self.concept_forget
+      scratch["daily_reflection_time"] = self.daily_reflection_time
+      scratch["daily_reflection_size"] = self.daily_reflection_size
+      scratch["overlap_reflect_th"] = self.overlap_reflect_th
+      scratch["kw_strg_event_reflect_th"] = self.kw_strg_event_reflect_th
+      scratch["kw_strg_thought_reflect_th"] = self.kw_strg_thought_reflect_th
 
-    scratch["daily_req"] = self.daily_req
-    scratch["f_daily_schedule"] = self.f_daily_schedule
-    scratch["f_daily_schedule_hourly_org"] = self.f_daily_schedule_hourly_org
+      scratch["recency_w"] = self.recency_w
+      scratch["relevance_w"] = self.relevance_w
+      scratch["importance_w"] = self.importance_w
+      scratch["recency_decay"] = self.recency_decay
+      scratch["importance_trigger_max"] = self.importance_trigger_max
+      scratch["importance_trigger_curr"] = self.importance_trigger_curr
+      scratch["importance_ele_n"] = self.importance_ele_n
+      scratch["thought_count"] = self.thought_count
 
-    scratch["act_address"] = self.act_address
-    scratch["act_start_time"] = (self.act_start_time
-                                     .strftime("%B %d, %Y, %H:%M:%S"))
-    scratch["act_duration"] = self.act_duration
-    scratch["act_description"] = self.act_description
-    scratch["act_pronunciatio"] = self.act_pronunciatio
-    scratch["act_event"] = self.act_event
+      scratch["daily_req"] = self.daily_req
+      scratch["f_daily_schedule"] = self.f_daily_schedule
+      scratch["f_daily_schedule_hourly_org"] = self.f_daily_schedule_hourly_org
 
-    scratch["act_obj_description"] = self.act_obj_description
-    scratch["act_obj_pronunciatio"] = self.act_obj_pronunciatio
-    scratch["act_obj_event"] = self.act_obj_event
+      scratch["act_address"] = self.act_address
+      scratch["act_start_time"] = (self.act_start_time
+                                      .strftime("%B %d, %Y, %H:%M:%S"))
+      scratch["act_duration"] = self.act_duration
+      scratch["act_description"] = self.act_description
+      scratch["act_pronunciatio"] = self.act_pronunciatio
+      scratch["act_event"] = self.act_event
 
-    scratch["chatting_with"] = self.chatting_with
-    scratch["chat"] = self.chat
-    scratch["chatting_with_buffer"] = self.chatting_with_buffer
-    if self.chatting_end_time: 
-      scratch["chatting_end_time"] = (self.chatting_end_time
-                                        .strftime("%B %d, %Y, %H:%M:%S"))
-    else: 
-      scratch["chatting_end_time"] = None
+      scratch["act_obj_description"] = self.act_obj_description
+      scratch["act_obj_pronunciatio"] = self.act_obj_pronunciatio
+      scratch["act_obj_event"] = self.act_obj_event
 
-    scratch["act_path_set"] = self.act_path_set
-    scratch["planned_path"] = self.planned_path
+      scratch["chatting_with"] = self.chatting_with
+      scratch["chat"] = self.chat
+      scratch["chatting_with_buffer"] = self.chatting_with_buffer
+      if self.chatting_end_time: 
+        scratch["chatting_end_time"] = (self.chatting_end_time
+                                          .strftime("%B %d, %Y, %H:%M:%S"))
+      else: 
+        scratch["chatting_end_time"] = None
 
-    with open(out_json, "w") as outfile:
-      json.dump(scratch, outfile, indent=2) 
+      scratch["act_path_set"] = self.act_path_set
+      scratch["planned_path"] = self.planned_path
+
+      with open(out_json, "w") as outfile:
+        json.dump(scratch, outfile, indent=2) 
+      
+      logging.debug("Scratch object saved")
+
+    except Exception as e:
+      logging.error(f"An error occurred while saving the Scratch object: {e}")
 
 
   def get_f_daily_schedule_index(self, advance=0):
@@ -327,7 +361,9 @@ class Scratch:
     OUTPUT 
       an integer value for the current index of f_daily_schedule.
     """
-    # We first calculate teh number of minutes elapsed today. 
+    logging.debug("Getting daily schedule index")
+
+    # We first calculate the number of minutes elapsed today. 
     today_min_elapsed = 0
     today_min_elapsed += self.curr_time.hour * 60
     today_min_elapsed += self.curr_time.minute
@@ -348,7 +384,12 @@ class Scratch:
       if elapsed > today_min_elapsed: 
         return curr_index
       curr_index += 1
+    
+    if curr_index >= len(self.f_daily_schedule):
+        logging.warning("Current index exceeds the length of the daily schedule.")
 
+    logging.info(f"Calculated daily schedule index: {curr_index}")
+    logging.debug(f"Daily schedule index returned")
     return curr_index
 
 
@@ -363,6 +404,8 @@ class Scratch:
     OUTPUT 
       an integer value for the current index of f_daily_schedule.
     """
+    logging.debug("Getting daily schedule hourly org index")
+
     # We first calculate teh number of minutes elapsed today. 
     today_min_elapsed = 0
     today_min_elapsed += self.curr_time.hour * 60
@@ -376,6 +419,8 @@ class Scratch:
       if elapsed > today_min_elapsed: 
         return curr_index
       curr_index += 1
+
+    logging.debug(f"Daily schedule hourly org index returned")
     return curr_index
 
 
@@ -402,6 +447,8 @@ class Scratch:
        Daily plan requirement: Dolores is planning to stay at home all day and 
          never go out."
     """
+    logging.debug("Getting identity stable set")
+
     commonset = ""
     commonset += f"Name: {self.name}\n"
     commonset += f"Age: {self.age}\n"
@@ -411,6 +458,8 @@ class Scratch:
     commonset += f"Lifestyle: {self.lifestyle}\n"
     commonset += f"Daily plan requirement: {self.daily_plan_req}\n"
     commonset += f"Current Date: {self.curr_time.strftime('%A %B %d')}\n"
+    
+    logging.debug("Identity stable set retrieved")
     return commonset
 
 
@@ -495,6 +544,12 @@ class Scratch:
                      act_obj_pronunciatio, 
                      act_obj_event, 
                      act_start_time=None): 
+    logging.info(f"Adding new action with address: {action_address}, duration: {action_duration}")
+
+    if action_address is None or action_duration is None:
+      logging.critical("Essential parameters for adding a new action are missing.")
+      raise ValueError("Action address and duration must be provided.")
+
     self.act_address = action_address
     self.act_duration = action_duration
     self.act_description = action_description
@@ -514,6 +569,8 @@ class Scratch:
     self.act_start_time = self.curr_time
     
     self.act_path_set = False
+
+    logging.debug(f"New action added: {self.act_description}")
 
 
   def act_time_str(self): 
@@ -541,9 +598,13 @@ class Scratch:
       Boolean [True]: Action has finished.
       Boolean [False]: Action has not finished and is still ongoing.
     """
+    logging.info("Checking if action is finished")
+    
+    # If there's no ongoing action
     if not self.act_address: 
       return True
       
+    # Calculate end_time based on chatting or a regular action
     if self.chatting_with: 
       end_time = self.chatting_end_time
     else: 
@@ -554,7 +615,10 @@ class Scratch:
       end_time = (x + datetime.timedelta(minutes=self.act_duration))
 
     if end_time.strftime("%H:%M:%S") == self.curr_time.strftime("%H:%M:%S"): 
+      logging.debug("Action finished: True")
       return True
+    
+    logging.debug("Action finished: False")
     return False
 
 
@@ -567,6 +631,8 @@ class Scratch:
     OUTPUT 
       ret: A human readable summary of the action.
     """
+    logging.info("Summarizing the current action.")
+
     exp = dict()
     exp["persona"] = self.name
     exp["address"] = self.act_address
@@ -578,24 +644,29 @@ class Scratch:
 
 
   def act_summary_str(self):
-    """
-    Returns a string summary of the current action. Meant to be 
-    human-readable.
+    try:
+      """
+      Returns a string summary of the current action. Meant to be 
+      human-readable.
 
-    INPUT
-      None
-    OUTPUT 
-      ret: A human readable summary of the action.
-    """
-    start_datetime_str = self.act_start_time.strftime("%A %B %d -- %H:%M %p")
-    ret = f"[{start_datetime_str}]\n"
-    ret += f"Activity: {self.name} is {self.act_description}\n"
-    ret += f"Address: {self.act_address}\n"
-    ret += f"Duration in minutes (e.g., x min): {str(self.act_duration)} min\n"
-    return ret
+      INPUT
+        None
+      OUTPUT 
+        ret: A human readable summary of the action.
+      """
+      start_datetime_str = self.act_start_time.strftime("%A %B %d -- %H:%M %p")
+      ret = f"[{start_datetime_str}]\n"
+      ret += f"Activity: {self.name} is {self.act_description}\n"
+      ret += f"Address: {self.act_address}\n"
+      ret += f"Duration in minutes (e.g., x min): {str(self.act_duration)} min\n"
+      return ret
+    except Exception as e:
+      logging.error(f"An error occurred while summarizing the action: {e}")
 
 
   def get_str_daily_schedule_summary(self): 
+    logging.info("Generating daily schedule summary")
+
     ret = ""
     curr_min_sum = 0
     for row in self.f_daily_schedule: 
@@ -603,6 +674,11 @@ class Scratch:
       hour = int(curr_min_sum/60)
       minute = curr_min_sum%60
       ret += f"{hour:02}:{minute:02} || {row[0]}\n"
+    
+    if len(self.f_daily_schedule) == 0:
+      logging.warning("Daily schedule is empty.")
+
+    logging.debug("Daily schedule summary generated")
     return ret
 
 
@@ -615,23 +691,3 @@ class Scratch:
       minute = curr_min_sum%60
       ret += f"{hour:02}:{minute:02} || {row[0]}\n"
     return ret
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
