@@ -49,7 +49,7 @@ Run "start.bat" to start the servers up (frontend and backend).
 
   Follow this up with whatever you want your fork to be called (and saved as in the storage directory)
 
-  You can then use run 6000 (or any other integer, divide this value by 10 and you get the number of in-game seconds that the simulation is running for)
+  You can then use run 6000 (or any other integer, multiply this value by 10 and you get the number of in-game seconds that the simulation is running for). For instance, 1hr in game = 360 steps
   
   If it pauses and you want to run it further, you can simply continue the simulation with a new fork of your old version (by closing the old frontend and backend, then loading new ones).
 
