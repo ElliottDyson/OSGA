@@ -39,7 +39,7 @@ base_api_url = HTTP://localhost:8000/v1 #For hosting the model on the same syste
 
 ## How to use
 
-Run the "install requirements.bat" file to install the required Python dependencies for running the server.
+Run the "install requirements.bat" file to install the required Python dependencies.
 
 
 Run "start.bat" to start the servers up (frontend and backend). 
@@ -51,17 +51,18 @@ Run "start.bat" to start the servers up (frontend and backend).
 
   You can then use run 6000 (or any other integer, multiply this value by 10 and you get the number of in-game seconds that the simulation is running for). For instance, 1hr in game = 360 steps
   
-  If it pauses and you want to run it further, you can simply continue the simulation with a new fork of your old version (by closing the old frontend and backend, then loading new ones).
+  If it pauses and you want to run it further, you can continue the simulation with a new fork of your old version (by closing the old frontend and backend, then loading new ones).
 
 
 Be patient! It might take a while until the front_end loads up properly, this is because the first actions have to be completed by the personas first!
+Once you have loaded the front end, don't refresh the page as it may pause the simulation backend (the reason this is happening is currently unknown).
+You can move around the simulator GUI using arrow keys.
 
-
-Access the current frontend in your browser here: http://127.0.0.1:8000/simulator_home
+Access the current front end in your browser here: http://127.0.0.1:8000/simulator_home
 Access previous simulations in your browser here (frontend still needs to be running): http://localhost:8000/replay/simulation-name/starting-time-step
 
 
-Have you had any issues? Post them here on GitHub with the appropriate 'tag'. We'll try and get around to fixing them as quickly as we can! (This may not be particularly quick until we have more people helping us)
+Have you had any issues? Post them here on GitHub with the appropriate 'tag'. We'll try to get around to fixing them as quickly as we can! (This may not be particularly quick until we have more people helping us)
 
 ## Community
 
