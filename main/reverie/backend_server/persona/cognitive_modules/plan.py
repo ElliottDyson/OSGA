@@ -1,5 +1,6 @@
 """
-Author: Joon Sung Park (joonspk@stanford.edu)
+Original Author: Joon Sung Park (joonspk@stanford.edu)
+New Authors/Editors: OSGA Community, OSGA Community Organiser: Elliott Dyson (elliottdysondesigns@gmail.com)
 
 File: plan.py
 Description: This defines the "Plan" module for generative agents. 
@@ -223,7 +224,7 @@ def generate_action_game_object(act_desp, act_address, persona, maze):
   return run_gpt_prompt_action_game_object(act_desp, persona, maze, act_address)[0]
 
 
-def generate_action_pronunciatio(act_desp, persona): 
+def generate_action_pronunciation(act_desp, persona): 
   """TODO 
   Given an action description, creates an emoji string description via a few
   shot prompt. 
@@ -240,7 +241,7 @@ def generate_action_pronunciatio(act_desp, persona):
   """
   if debug: print ("GNS FUNCTION: <generate_action_pronunciation>")
   try: 
-    x = run_gpt_prompt_pronunciatio(act_desp, persona)[0]
+    x = run_gpt_prompt_pronunciation(act_desp, persona)[0]
   except: 
     x = "🙂"
 
@@ -629,11 +630,11 @@ def _determine_action(persona, maze):
   act_game_object = generate_action_game_object(act_desp, act_address,
                                                 persona, maze)
   new_address = f"{act_world}:{act_sector}:{act_arena}:{act_game_object}"
-  act_pron = generate_action_pronunciatio(act_desp, persona)
+  act_pron = generate_action_pronunciation(act_desp, persona)
   act_event = generate_action_event_triple(act_desp, persona)
   # Persona's actions also influence the object states. We set those up here. 
   act_obj_desp = generate_act_obj_desc(act_game_object, act_desp, persona)
-  act_obj_pron = generate_action_pronunciatio(act_obj_desp, persona)
+  act_obj_pron = generate_action_pronunciation(act_obj_desp, persona)
   act_obj_event = generate_act_obj_event_triple(act_game_object, 
                                                 act_obj_desp, persona)
 
@@ -806,7 +807,7 @@ def _should_react(persona, retrieved, personas):
 def _create_react(persona, inserted_act, inserted_act_dur,
                   act_address, act_event, chatting_with, chat, chatting_with_buffer,
                   chatting_end_time, 
-                  act_pronunciatio, act_obj_description, act_obj_pronunciatio, 
+                  act_pronunciation, act_obj_description, act_obj_pronunciation, 
                   act_obj_event, act_start_time=None): 
   p = persona 
 
@@ -845,14 +846,14 @@ def _create_react(persona, inserted_act, inserted_act_dur,
   p.scratch.add_new_action(act_address,
                            inserted_act_dur,
                            inserted_act,
-                           act_pronunciatio,
+                           act_pronunciation,
                            act_event,
                            chatting_with,
                            chat,
                            chatting_with_buffer,
                            chatting_end_time,
                            act_obj_description,
-                           act_obj_pronunciatio,
+                           act_obj_pronunciation,
                            act_obj_event,
                            act_start_time)
 
@@ -893,14 +894,14 @@ def _chat_react(maze, persona, focused_event, reaction_mode, personas):
       chatting_with_buffer = {}
       chatting_with_buffer[init_persona.name] = 800
 
-    act_pronunciatio = "💬" 
+    act_pronunciation = "💬" 
     act_obj_description = None
-    act_obj_pronunciatio = None
+    act_obj_pronunciation = None
     act_obj_event = (None, None, None)
 
     _create_react(p, inserted_act, inserted_act_dur,
       act_address, act_event, chatting_with, convo, chatting_with_buffer, chatting_end_time,
-      act_pronunciatio, act_obj_description, act_obj_pronunciatio, 
+      act_pronunciation, act_obj_description, act_obj_pronunciation, 
       act_obj_event, act_start_time)
 
 
@@ -918,14 +919,14 @@ def _wait_react(persona, reaction_mode):
   chatting_with_buffer = None
   chatting_end_time = None
 
-  act_pronunciatio = "⌛" 
+  act_pronunciation = "⌛" 
   act_obj_description = None
-  act_obj_pronunciatio = None
+  act_obj_pronunciation = None
   act_obj_event = (None, None, None)
 
   _create_react(p, inserted_act, inserted_act_dur,
     act_address, act_event, chatting_with, chat, chatting_with_buffer, chatting_end_time,
-    act_pronunciatio, act_obj_description, act_obj_pronunciatio, act_obj_event)
+    act_pronunciation, act_obj_description, act_obj_pronunciation, act_obj_event)
 
 
 def plan(persona, maze, personas, new_day, retrieved): 

@@ -1,0 +1,34 @@
+{
+  "persona": {
+    "Isabella Rodriguez": {
+      "movement": [
+        81,
+        14
+      ],
+      "pronunciation": "\ud83d\ude42",
+      "description": "still sleeping @ the Ville:Isabella Rodriguez's apartment:bathroom:shower",
+      "chat": null
+    },
+    "Maria Lopez": {
+      "movement": [
+        123,
+        57
+      ],
+      "pronunciation": "\ud83d\ude42",
+      "description": "sleeping @ the Ville:Dorm for Oak Hill College:Maria Lopez's room:bed",
+      "chat": null
+    },
+    "Klaus Mueller": {
+      "movement": [
+        95,
+        32
+      ],
+      "pronunciation": "\ud83d\ude42",
+      "description": "having lunch at Hobbs Cafe @ the Ville:Hobbs Cafe:cafe:refrigerator",
+      "chat": null
+    }
+  },
+  "meta": {
+    "curr_time": "August 27, 2023, 09:05:10"
+  }
+}

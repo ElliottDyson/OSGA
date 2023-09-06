@@ -1,0 +1,34 @@
+{
+  "persona": {
+    "Isabella Rodriguez": {
+      "movement": [
+        74,
+        14
+      ],
+      "pronunciation": "\ud83d\ude42",
+      "description": "preparing dinner for her family. She loves cooking and always makes sure to make something special for them. She might also use this time to start planning out the menu for the next day at Hobbs Cafe @ the Ville:Isabella Rodriguez's apartment:main room:refrigerator",
+      "chat": null
+    },
+    "Maria Lopez": {
+      "movement": [
+        123,
+        56
+      ],
+      "pronunciation": "\ud83d\ude42",
+      "description": "now taking a short break for lunch at Hobbs Cafe. She ordered her favorite sandwich - the turkey avocado on whole wheat bread with a side of fruit salad. As she eats, she checks her Twitch @ the Ville:Dorm for Oak Hill College:kitchen:cooking area",
+      "chat": null
+    },
+    "Klaus Mueller": {
+      "movement": [
+        114,
+        30
+      ],
+      "pronunciation": "\ud83d\ude42",
+      "description": "still in class @ the Ville:Oak Hill College:classroom:blackboard",
+      "chat": null
+    }
+  },
+  "meta": {
+    "curr_time": "August 28, 2023, 10:02:00"
+  }
+}

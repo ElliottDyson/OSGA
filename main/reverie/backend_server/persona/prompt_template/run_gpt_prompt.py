@@ -1,5 +1,6 @@
 """
-Author: Joon Sung Park (joonspk@stanford.edu)
+Original Author: Joon Sung Park (joonspk@stanford.edu)
+New Authors/Editors: OSGA Community, OSGA Community Organiser: Elliott Dyson (elliottdysondesigns@gmail.com)
 
 File: run_gpt_prompt.py
 Description: Defines all run gpt prompt functions. These functions directly
@@ -71,32 +72,40 @@ def run_gpt_prompt_wake_up_hour(persona, test_input=None, verbose=False):
   def __func_clean_up(gpt_response, prompt=""):
     cr = int(gpt_response.strip().lower().split("am")[0])
     return cr
-  
-  def __func_validate(gpt_response, prompt=""): 
-    try: __func_clean_up(gpt_response, prompt="")
-    except: return False
-    return True
 
   def get_fail_safe(): 
     fs = 8
     return fs
 
   gpt_param = {"engine": "text-davinci-002", "max_tokens": 5, 
-             "temperature": 0.7, "top_p": 0.8, "stream": False,
+             "temperature": 0, "top_p": 1, "stream": False,
              "frequency_penalty": 0, "presence_penalty": 0, "stop": ["\n"]}
   prompt_template = "persona/prompt_template/v2/wake_up_hour_v1.txt"
   prompt_input = create_prompt_input(persona, test_input)
   prompt = generate_prompt(prompt_input, prompt_template)
   fail_safe = get_fail_safe()
-
-  output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
-                                   __func_validate, __func_clean_up)
   
+  max_retries = 5
+
+  for attempt in range(max_retries): # Generating response, trying to clean up response, if clean up fails it tries again until max_retries is reached
+      try:
+          output = generate_response(prompt, gpt_param)
+          output = __func_clean_up(output, prompt=prompt)
+      except Exception as e:
+          if attempt < max_retries - 1:  # i.e. if not the last attempt
+              logging.warning(f"Attempt {attempt + 1} failed with error: {e}. Retrying...")
+              continue
+          else:
+              logging.error(f"Attempt {attempt + 1} failed with error: {e}. Using failsafe: {fail_safe}.")
+              output = fail_safe
+              break
+
   if debug or verbose: 
     print_run_prompts(prompt_template, persona, gpt_param, 
                       prompt_input, prompt, output)
     
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
+
 
 
 def run_gpt_prompt_daily_plan(persona, 
@@ -135,12 +144,6 @@ def run_gpt_prompt_daily_plan(persona,
           cr += [i[:-1].strip()]
     return cr
 
-  def __func_validate(gpt_response, prompt=""):
-    try: __func_clean_up(gpt_response, prompt="")
-    except: 
-      return False
-    return True
-
   def get_fail_safe(): 
     fs = ['wake up and complete the morning routine at 6:00 am', 
           'eat breakfast at 7:00 am', 
@@ -150,8 +153,6 @@ def run_gpt_prompt_daily_plan(persona,
           'relax and watch TV from 7:00 pm to 8:00 pm', 
           'go to bed at 11:00 pm'] 
     return fs
-
-
   
   gpt_param = {"engine": "text-davinci-003", "max_tokens": 500, 
                "temperature": 0.7, "top_p": 0.8, "stream": False,
@@ -161,8 +162,21 @@ def run_gpt_prompt_daily_plan(persona,
   prompt = generate_prompt(prompt_input, prompt_template)
   fail_safe = get_fail_safe()
 
-  output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
-                                   __func_validate, __func_clean_up)
+  max_retries = 5
+
+  for attempt in range(max_retries): # Generating response, trying to clean up response, if clean up fails it tries again until max_retries is reached
+      try:
+          output = generate_response(prompt, gpt_param)
+          output = __func_clean_up(output, prompt=prompt)
+      except Exception as e:
+          if attempt < max_retries - 1:  # i.e. if not the last attempt
+              logging.warning(f"Attempt {attempt + 1} failed with error: {e}. Retrying...")
+              continue
+          else:
+              logging.error(f"Attempt {attempt + 1} failed with error: {e}. Using failsafe: {fail_safe}.")
+              output = fail_safe
+              break
+          
   output = ([f"wake up and complete the morning routine at {wake_up_hour}:00 am"]
               + output)
 
@@ -171,6 +185,7 @@ def run_gpt_prompt_daily_plan(persona,
                       prompt_input, prompt, output)
     
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
+
 
 
 def run_gpt_prompt_generate_hourly_schedule(persona, 
@@ -193,8 +208,8 @@ def run_gpt_prompt_generate_hourly_schedule(persona,
       schedule_format += f" Activity: [Fill in]\n"
     schedule_format = schedule_format[:-1]
 
-    intermission_str = f"Here the originally intended hourly breakdown of"
-    intermission_str += f" {persona.scratch.get_str_firstname()}'s schedule today: "
+    intermission_str = f"Here is some of what"
+    intermission_str += f" {persona.scratch.get_str_firstname()} wants to get done today: "
     for count, i in enumerate(persona.scratch.daily_req): 
       intermission_str += f"{str(count+1)}) {i}, "
     intermission_str = intermission_str[:-2]
@@ -203,14 +218,14 @@ def run_gpt_prompt_generate_hourly_schedule(persona,
     if p_f_ds_hourly_org: 
       prior_schedule = "\n"
       for count, i in enumerate(p_f_ds_hourly_org): 
-        prior_schedule += f"[(ID:{get_random_alphanumeric()})" 
+        #prior_schedule += f"[(ID:{get_random_alphanumeric()})" Commented out since there is not reason that can be seen for it to be here, and it was causing bad quality outputs
         prior_schedule += f" {persona.scratch.get_str_curr_date_str()} --"
         prior_schedule += f" {hour_str[count]}] Activity:"
         prior_schedule += f" {persona.scratch.get_str_firstname()}"
         prior_schedule += f" is {i}\n"
 
-    prompt_ending = f"[(ID:{get_random_alphanumeric()})"
-    prompt_ending += f" {persona.scratch.get_str_curr_date_str()}"
+    #prompt_ending = f"[(ID:{get_random_alphanumeric()})" Commented out since there is not reason that can be seen for it to be here, and it was causing bad quality outputs
+    prompt_ending = f" {persona.scratch.get_str_curr_date_str()}" # Adjusted from '+=' to '=' due to removal of 'get_random_alphanumeric()'
     prompt_ending += f" -- {curr_hour_str}] Activity:"
     prompt_ending += f" {persona.scratch.get_str_firstname()} is"
 
@@ -237,20 +252,13 @@ def run_gpt_prompt_generate_hourly_schedule(persona,
       cr = cr[:-1]
     return cr
 
-  def __func_validate(gpt_response, prompt=""): 
-    try: __func_clean_up(gpt_response, prompt="")
-    except: return False
-    return True
-
   def get_fail_safe(): 
     fs = "asleep"
     return fs
 
-
-
   gpt_param = {"engine": "text-davinci-003", "max_tokens": 50, 
                "temperature": 0.7, "top_p": 0.8, "stream": False,
-               "frequency_penalty": 0, "presence_penalty": 0, "stop": None}
+               "frequency_penalty": 0, "presence_penalty": 0.5, "stop": ["\n"]}
   prompt_template = "persona/prompt_template/v2/generate_hourly_schedule_v2.txt"
   prompt_input = create_prompt_input(persona, 
                                      curr_hour_str, 
@@ -261,19 +269,26 @@ def run_gpt_prompt_generate_hourly_schedule(persona,
   prompt = generate_prompt(prompt_input, prompt_template)
   fail_safe = get_fail_safe()
   
-  output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
-                                   __func_validate, __func_clean_up)
+  max_retries = 5
+
+  for attempt in range(max_retries): # Generating response, trying to clean up response, if clean up fails it tries again until max_retries is reached
+      try:
+          output = generate_response(prompt, gpt_param)
+          output = __func_clean_up(output, prompt=prompt)
+      except Exception as e:
+          if attempt < max_retries - 1:  # i.e. if not the last attempt
+              logging.warning(f"Attempt {attempt + 1} failed with error: {e}. Retrying...")
+              continue
+          else:
+              logging.error(f"Attempt {attempt + 1} failed with error: {e}. Using failsafe: {fail_safe}.")
+              output = fail_safe
+              break
   
   if debug or verbose: 
     print_run_prompts(prompt_template, persona, gpt_param, 
                       prompt_input, prompt, output)
     
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
-
-
-
-
-
 
 
 
@@ -396,15 +411,6 @@ def run_gpt_prompt_task_decomp(persona,
 
     return cr
 
-  def __func_validate(gpt_response, prompt=""): 
-    # TODO -- this sometimes generates error 
-    try: 
-      __func_clean_up(gpt_response)
-    except: 
-      pass
-      return False
-    return gpt_response
-
   def get_fail_safe(): 
     fs = ["asleep"]
     return fs
@@ -419,8 +425,20 @@ def run_gpt_prompt_task_decomp(persona,
 
   print ("?????")
   print (prompt)
-  output = safe_generate_response(prompt, gpt_param, 5, get_fail_safe(),
-                                   __func_validate, __func_clean_up)
+  max_retries = 5
+
+  for attempt in range(max_retries): # Generating response, trying to clean up response, if clean up fails it tries again until max_retries is reached
+      try:
+          output = generate_response(prompt, gpt_param)
+          output = __func_clean_up(output, prompt=prompt)
+      except Exception as e:
+          if attempt < max_retries - 1:  # i.e. if not the last attempt
+              logging.warning(f"Attempt {attempt + 1} failed with error: {e}. Retrying...")
+              continue
+          else:
+              logging.error(f"Attempt {attempt + 1} failed with error: {e}. Using failsafe: {fail_safe}.")
+              output = fail_safe
+              break
 
   # TODO THERE WAS A BUG HERE... 
   # This is for preventing overflows...
@@ -460,14 +478,11 @@ def run_gpt_prompt_task_decomp(persona,
     fin_output[-1][1] += (duration - ftime_sum)
   output = fin_output 
 
-
-
   task_decomp = output
   ret = []
   for decomp_task, duration in task_decomp: 
     ret += [[f"{task} ({decomp_task})", duration]]
   output = ret
-
 
   if debug or verbose: 
     print_run_prompts(prompt_template, persona, gpt_param, 
@@ -518,8 +533,6 @@ def run_gpt_prompt_action_sector(action_description,
 
     prompt_input += [accessible_sector_str]
 
-
-
     action_description_1 = action_description
     action_description_2 = action_description
     if "(" in action_description: 
@@ -531,34 +544,14 @@ def run_gpt_prompt_action_sector(action_description,
     prompt_input += [action_description_2]
     prompt_input += [persona.scratch.get_str_name()]
     return prompt_input
-
-
-    
-
-    
-
-
+  
   def __func_clean_up(gpt_response, prompt=""):
     cleaned_response = gpt_response.split("}")[0]
     return cleaned_response
-
-  def __func_validate(gpt_response, prompt=""): 
-    if len(gpt_response.strip()) < 1: 
-      return False
-    if "}" not in gpt_response:
-      return False
-    if "," in gpt_response: 
-      return False
-    return True
   
   def get_fail_safe(): 
     fs = ("kitchen")
     return fs
-
-
-
-
-
 
   gpt_param = {"engine": "text-davinci-002", "max_tokens": 15, 
                "temperature": 0.2, "top_p": 0.1, "stream": False,
@@ -568,8 +561,27 @@ def run_gpt_prompt_action_sector(action_description,
   prompt = generate_prompt(prompt_input, prompt_template)
 
   fail_safe = get_fail_safe()
-  output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
-                                   __func_validate, __func_clean_up)
+  max_retries = 5
+
+  for attempt in range(max_retries): # Generating response, trying to clean up response, if clean up fails it tries again until max_retries is reached
+      try:
+          output = generate_response(prompt, gpt_param)
+          if "}" not in output:
+            raise Exception("'}' was not found in the response")
+          if "," not in output:
+            raise Exception("',' was not found in the response")
+          if len(output.strip()) < 1: 
+            raise Exception("The length of the stripped output was less than 1")
+          output = __func_clean_up(output, prompt=prompt)
+      except Exception as e:
+          if attempt < max_retries - 1:  # i.e. if not the last attempt
+              logging.warning(f"Attempt {attempt + 1} failed with error: {e}. Retrying...")
+              continue
+          else:
+              logging.error(f"Attempt {attempt + 1} failed with error: {e}. Using failsafe: {fail_safe}.")
+              output = fail_safe
+              break
+          
   y = f"{maze.access_tile(persona.scratch.curr_tile)['world']}"
   x = [i.strip() for i in persona.s_mem.get_str_accessible_sectors(y).split(",")]
   if output not in x: 
@@ -613,9 +625,7 @@ def run_gpt_prompt_action_arena(action_description,
     accessible_arena_str = ", ".join(fin_accessible_arenas)
     # END MAR 11 TEMP
 
-
     prompt_input += [accessible_arena_str]
-
 
     action_description_1 = action_description
     action_description_2 = action_description
@@ -628,8 +638,6 @@ def run_gpt_prompt_action_arena(action_description,
     prompt_input += [action_description_2]
     prompt_input += [persona.scratch.get_str_name()]
 
-    
-
     prompt_input += [act_sector]
 
     prompt_input += [accessible_arena_str]
@@ -637,21 +645,11 @@ def run_gpt_prompt_action_arena(action_description,
     # x = f"{maze.access_tile(persona.scratch.curr_tile)['world']}:{maze.access_tile(persona.scratch.curr_tile)['sector']}:{maze.access_tile(persona.scratch.curr_tile)['arena']}"
     # prompt_input += [persona.s_mem.get_str_accessible_arena_game_objects(x)]
 
-    
     return prompt_input
 
   def __func_clean_up(gpt_response, prompt=""):
     cleaned_response = gpt_response.split("}")[0]
     return cleaned_response
-
-  def __func_validate(gpt_response, prompt=""): 
-    if len(gpt_response.strip()) < 1: 
-      return False
-    if "}" not in gpt_response:
-      return False
-    if "," in gpt_response: 
-      return False
-    return True
   
   def get_fail_safe(): 
     fs = ("kitchen")
@@ -665,8 +663,26 @@ def run_gpt_prompt_action_arena(action_description,
   prompt = generate_prompt(prompt_input, prompt_template)
 
   fail_safe = get_fail_safe()
-  output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
-                                   __func_validate, __func_clean_up)
+  max_retries = 5
+
+  for attempt in range(max_retries): # Generating response, trying to clean up response, if clean up fails it tries again until max_retries is reached
+      try:
+          output = generate_response(prompt, gpt_param)
+          if "}" not in output:
+            raise Exception("'}' was not found in the response")
+          if "," not in output:
+            raise Exception("',' was not found in the response")
+          if len(output.strip()) < 1: 
+            raise Exception("The length of the stripped output was less than 1")
+          output = __func_clean_up(output, prompt=prompt)
+      except Exception as e:
+          if attempt < max_retries - 1:  # i.e. if not the last attempt
+              logging.warning(f"Attempt {attempt + 1} failed with error: {e}. Retrying...")
+              continue
+          else:
+              logging.error(f"Attempt {attempt + 1} failed with error: {e}. Using failsafe: {fail_safe}.")
+              output = fail_safe
+              break
   print (output)
   # y = f"{act_world}:{act_sector}"
   # x = [i.strip() for i in persona.s_mem.get_str_accessible_sector_arenas(y).split(",")]
@@ -699,11 +715,6 @@ def run_gpt_prompt_action_game_object(action_description,
     prompt_input += [persona
                      .s_mem.get_str_accessible_arena_game_objects(temp_address)]
     return prompt_input
-  
-  def __func_validate(gpt_response, prompt=""): 
-    if len(gpt_response.strip()) < 1: 
-      return False
-    return True
 
   def __func_clean_up(gpt_response, prompt=""):
     cleaned_response = gpt_response.strip()
@@ -724,8 +735,22 @@ def run_gpt_prompt_action_game_object(action_description,
   prompt = generate_prompt(prompt_input, prompt_template)
 
   fail_safe = get_fail_safe()
-  output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
-                                   __func_validate, __func_clean_up)
+  max_retries = 5
+
+  for attempt in range(max_retries): # Generating response, trying to clean up response, if clean up fails it tries again until max_retries is reached
+      try:
+          output = generate_response(prompt, gpt_param)
+          if len(output.strip()) < 1: 
+            raise Exception("The length of the stripped output was less than 1")
+          output = __func_clean_up(output, prompt=prompt)
+      except Exception as e:
+          if attempt < max_retries - 1:  # i.e. if not the last attempt
+              logging.warning(f"Attempt {attempt + 1} failed with error: {e}. Retrying...")
+              continue
+          else:
+              logging.error(f"Attempt {attempt + 1} failed with error: {e}. Using failsafe: {fail_safe}.")
+              output = fail_safe
+              break
 
   x = [i.strip() for i in persona.s_mem.get_str_accessible_arena_game_objects(temp_address).split(",")]
   if output not in x: 
@@ -739,8 +764,7 @@ def run_gpt_prompt_action_game_object(action_description,
 
 
 
-
-def run_gpt_prompt_pronunciatio(action_description, persona, verbose=True): 
+def run_gpt_prompt_pronunciation(action_description, persona, verbose=True): 
   def create_prompt_input(action_description): 
     if "(" in action_description: 
       action_description = action_description.split("(")[-1].split(")")[0]
@@ -753,14 +777,6 @@ def run_gpt_prompt_pronunciatio(action_description, persona, verbose=True):
       cr = cr[:3]
     return cr
 
-  def __func_validate(gpt_response, prompt=""): 
-    try: 
-      __func_clean_up(gpt_response, prompt="")
-      if len(gpt_response) == 0: 
-        return False
-    except: return False
-    return True 
-
   def get_fail_safe(): 
     fs = "😋"
     return fs
@@ -768,21 +784,29 @@ def run_gpt_prompt_pronunciatio(action_description, persona, verbose=True):
   gpt_param = {"engine": "text-davinci-002", "max_tokens": 15, 
                "temperature": 0.2, "top_p": 0.5, "stream": False,
                "frequency_penalty": 0, "presence_penalty": 0, "stop": None}
-  prompt_template = "persona/prompt_template/v2/generate_pronunciatio_v1.txt"
+  prompt_template = "persona/prompt_template/v2/generate_pronunciation_v1.txt"
   prompt_input = create_prompt_input(action_description)
   prompt = generate_prompt(prompt_input, prompt_template)
   fail_safe = get_fail_safe()
+  max_retries = 5
+
+  for attempt in range(max_retries): # Generating response, trying to clean up response, if clean up fails it tries again until max_retries is reached
+      try:
+          output = generate_response(prompt, gpt_param)
+          if len(output.strip()) == 0: 
+            raise Exception("The length of the stripped output was 0")
+          output = __func_clean_up(output, prompt=prompt)
+      except Exception as e:
+          if attempt < max_retries - 1:  # i.e. if not the last attempt
+              logging.warning(f"Attempt {attempt + 1} failed with error: {e}. Retrying...")
+              continue
+          else:
+              logging.error(f"Attempt {attempt + 1} failed with error: {e}. Using failsafe: {fail_safe}.")
+              output = fail_safe
+              break
 
   if output != False: 
     return output, [output, prompt, gpt_param, prompt_input, fail_safe]
-
-
-
-
-
-
-
-
 
 
 
@@ -800,14 +824,6 @@ def run_gpt_prompt_event_triple(action_description, persona, verbose=False):
     cr = [i.strip() for i in cr.split(")")[0].split(",")]
     return cr
 
-  def __func_validate(gpt_response, prompt=""): 
-    try: 
-      gpt_response = __func_clean_up(gpt_response, prompt="")
-      if len(gpt_response) != 2: 
-        return False
-    except: return False
-    return True 
-
   def get_fail_safe(persona): 
     fs = (persona.name, "is", "idle")
     return fs
@@ -819,8 +835,23 @@ def run_gpt_prompt_event_triple(action_description, persona, verbose=False):
   prompt_input = create_prompt_input(action_description, persona)
   prompt = generate_prompt(prompt_input, prompt_template)
   fail_safe = get_fail_safe(persona)
-  output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
-                                 __func_validate, __func_clean_up)
+  max_retries = 5
+
+  for attempt in range(max_retries): # Generating response, trying to clean up response, if clean up fails it tries again until max_retries is reached
+      try:
+          output = generate_response(prompt, gpt_param)
+          output = __func_clean_up(output, prompt=prompt)
+          if len(output) != 2: 
+            raise Exception("The length of the output was not 2")
+      except Exception as e:
+          if attempt < max_retries - 1:  # i.e. if not the last attempt
+              logging.warning(f"Attempt {attempt + 1} failed with error: {e}. Retrying...")
+              continue
+          else:
+              logging.error(f"Attempt {attempt + 1} failed with error: {e}. Using failsafe: {fail_safe}.")
+              output = fail_safe
+              break
+          
   output = (persona.name, output[0], output[1])
 
   if debug or verbose: 
@@ -828,16 +859,6 @@ def run_gpt_prompt_event_triple(action_description, persona, verbose=False):
                        prompt_input, prompt, output)
   
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -855,13 +876,6 @@ def run_gpt_prompt_act_obj_desc(act_game_object, act_desp, persona, verbose=Fals
     if cr[-1] == ".": cr = cr[:-1]
     return cr
 
-  def __func_validate(gpt_response, prompt=""): 
-    try: 
-      gpt_response = __func_clean_up(gpt_response, prompt="")
-    except: 
-      return False
-    return True 
-
   def get_fail_safe(act_game_object): 
     fs = f"{act_game_object} is idle"
     return fs
@@ -873,17 +887,26 @@ def run_gpt_prompt_act_obj_desc(act_game_object, act_desp, persona, verbose=Fals
   prompt_input = create_prompt_input(act_game_object, act_desp, persona)
   prompt = generate_prompt(prompt_input, prompt_template)
   fail_safe = get_fail_safe(act_game_object)
-  output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
-                                   __func_validate, __func_clean_up)
+  max_retries = 5
+
+  for attempt in range(max_retries): # Generating response, trying to clean up response, if clean up fails it tries again until max_retries is reached
+      try:
+          output = generate_response(prompt, gpt_param)
+          output = __func_clean_up(output, prompt=prompt)
+      except Exception as e:
+          if attempt < max_retries - 1:  # i.e. if not the last attempt
+              logging.warning(f"Attempt {attempt + 1} failed with error: {e}. Retrying...")
+              continue
+          else:
+              logging.error(f"Attempt {attempt + 1} failed with error: {e}. Using failsafe: {fail_safe}.")
+              output = fail_safe
+              break
 
   if debug or verbose: 
     print_run_prompts(prompt_template, persona, gpt_param, 
                       prompt_input, prompt, output)
   
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
-
-
-
 
 
 
@@ -899,14 +922,6 @@ def run_gpt_prompt_act_obj_event_triple(act_game_object, act_obj_desc, persona, 
     cr = [i.strip() for i in cr.split(")")[0].split(",")]
     return cr
 
-  def __func_validate(gpt_response, prompt=""): 
-    try: 
-      gpt_response = __func_clean_up(gpt_response, prompt="")
-      if len(gpt_response) != 2: 
-        return False
-    except: return False
-    return True 
-
   def get_fail_safe(act_game_object): 
     fs = (act_game_object, "is", "idle")
     return fs
@@ -918,8 +933,23 @@ def run_gpt_prompt_act_obj_event_triple(act_game_object, act_obj_desc, persona, 
   prompt_input = create_prompt_input(act_game_object, act_obj_desc)
   prompt = generate_prompt(prompt_input, prompt_template)
   fail_safe = get_fail_safe(act_game_object)
-  output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
-                                   __func_validate, __func_clean_up)
+  max_retries = 5
+
+  for attempt in range(max_retries): # Generating response, trying to clean up response, if clean up fails it tries again until max_retries is reached
+      try:
+          output = generate_response(prompt, gpt_param)
+          output = __func_clean_up(output, prompt=prompt)
+          if len(output) != 2: 
+            raise Exception("The length of the output was not 2")
+      except Exception as e:
+          if attempt < max_retries - 1:  # i.e. if not the last attempt
+              logging.warning(f"Attempt {attempt + 1} failed with error: {e}. Retrying...")
+              continue
+          else:
+              logging.error(f"Attempt {attempt + 1} failed with error: {e}. Using failsafe: {fail_safe}.")
+              output = fail_safe
+              break
+          
   output = (act_game_object, output[0], output[1])
 
   if debug or verbose: 
@@ -927,8 +957,6 @@ def run_gpt_prompt_act_obj_event_triple(act_game_object, act_obj_desc, persona, 
                       prompt_input, prompt, output)
   
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
-
-
 
 
 
@@ -1004,27 +1032,6 @@ def run_gpt_prompt_new_decomp_schedule(persona,
 
     return ret
 
-  def __func_validate(gpt_response, prompt=""): 
-    try: 
-      gpt_response = __func_clean_up(gpt_response, prompt)
-      dur_sum = 0
-      for act, dur in gpt_response: 
-        dur_sum += dur
-        if str(type(act)) != "<class 'str'>":
-          return False 
-        if str(type(dur)) != "<class 'int'>":
-          return False
-      x = prompt.split("\n")[0].split("originally planned schedule from")[-1].strip()[:-1]
-      x = [datetime.datetime.strptime(i.strip(), "%H:%M %p") for i in x.split(" to ")]
-      delta_min = int((x[1] - x[0]).total_seconds()/60)
-
-      if int(dur_sum) != int(delta_min): 
-        return False
-
-    except: 
-      return False
-    return True 
-
   def get_fail_safe(main_act_dur, truncated_act_dur): 
     dur_sum = 0
     for act, dur in main_act_dur: dur_sum += dur
@@ -1065,24 +1072,43 @@ def run_gpt_prompt_new_decomp_schedule(persona,
                                      test_input)
   prompt = generate_prompt(prompt_input, prompt_template)
   fail_safe = get_fail_safe(main_act_dur, truncated_act_dur)
-  output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
-                                   __func_validate, __func_clean_up)
+  max_retries = 5
+
+  for attempt in range(max_retries): # Generating response, trying to clean up response, if clean up fails it tries again until max_retries is reached
+      try:
+          output = generate_response(prompt, gpt_param)
+          output = __func_clean_up(output, prompt=prompt)
+          dur_sum = 0
+          for act, dur in output: 
+            dur_sum += dur
+            if str(type(act)) != "<class 'str'>":
+              return False 
+            if str(type(dur)) != "<class 'int'>":
+              return False
+          x = prompt.split("\n")[0].split("originally planned schedule from")[-1].strip()[:-1]
+          x = [datetime.datetime.strptime(i.strip(), "%H:%M %p") for i in x.split(" to ")]
+          delta_min = int((x[1] - x[0]).total_seconds()/60)
+          if int(dur_sum) != int(delta_min):
+            raise Exception("The hour was not used up in its entirety when planning minute by minute tasks for said hour")
+      except Exception as e:
+          if attempt < max_retries - 1:  # i.e. if not the last attempt
+              logging.warning(f"Attempt {attempt + 1} failed with error: {e}. Retrying...")
+              continue
+          else:
+              logging.error(f"Attempt {attempt + 1} failed with error: {e}. Using failsafe: {fail_safe}.")
+              output = fail_safe
+              break
   
   # print ("* * * * output")
   # print (output)
   # print ('* * * * fail_safe')
   # print (fail_safe)
 
-
-
   if debug or verbose: 
     print_run_prompts(prompt_template, persona, gpt_param, 
                       prompt_input, prompt, output)
   
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
-
-
-
 
 
 
@@ -1147,14 +1173,6 @@ def run_gpt_prompt_decide_to_talk(persona, target_persona, retrieved,test_input=
     prompt_input += [init_persona.name]
     prompt_input += [target_persona.name]
     return prompt_input
-  
-  def __func_validate(gpt_response, prompt=""): 
-    try: 
-      if gpt_response.split("Answer in yes or no:")[-1].strip().lower() in ["yes", "no"]: 
-        return True
-      return False     
-    except:
-      return False 
 
   def __func_clean_up(gpt_response, prompt=""):
     return gpt_response.split("Answer in yes or no:")[-1].strip().lower()
@@ -1162,8 +1180,6 @@ def run_gpt_prompt_decide_to_talk(persona, target_persona, retrieved,test_input=
   def get_fail_safe(): 
     fs = "yes"
     return fs
-
-
 
   gpt_param = {"engine": "text-davinci-003", "max_tokens": 20, 
                "temperature": 0.2, "top_p": 0.1, "stream": False,
@@ -1174,8 +1190,22 @@ def run_gpt_prompt_decide_to_talk(persona, target_persona, retrieved,test_input=
   prompt = generate_prompt(prompt_input, prompt_template)
 
   fail_safe = get_fail_safe()
-  output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
-                                   __func_validate, __func_clean_up)
+  max_retries = 5
+
+  for attempt in range(max_retries): # Generating response, trying to clean up response, if clean up fails it tries again until max_retries is reached
+      try:
+          output = generate_response(prompt, gpt_param)
+          if output.split("Answer in yes or no:")[-1].strip().lower() not in ["yes", "no"]: 
+            raise Exception("The answer did not contain either 'yes', nor 'no'")
+          output = __func_clean_up(output, prompt=prompt)
+      except Exception as e:
+          if attempt < max_retries - 1:  # i.e. if not the last attempt
+              logging.warning(f"Attempt {attempt + 1} failed with error: {e}. Retrying...")
+              continue
+          else:
+              logging.error(f"Attempt {attempt + 1} failed with error: {e}. Using failsafe: {fail_safe}.")
+              output = fail_safe
+              break
 
   if debug or verbose: 
     print_run_prompts(prompt_template, persona, gpt_param, 
@@ -1185,15 +1215,10 @@ def run_gpt_prompt_decide_to_talk(persona, target_persona, retrieved,test_input=
 
 
 
-
 def run_gpt_prompt_decide_to_react(persona, target_persona, retrieved,test_input=None, 
                                        verbose=False): 
   def create_prompt_input(init_persona, target_persona, retrieved, 
                           test_input=None): 
-
-    
-
-
     context = ""
     for c_node in retrieved["events"]: 
       curr_desc = c_node.description.split(" ")
@@ -1246,14 +1271,6 @@ def run_gpt_prompt_decide_to_react(persona, target_persona, retrieved,test_input
 
     prompt_input += [init_act_desc]
     return prompt_input
-  
-  def __func_validate(gpt_response, prompt=""): 
-    try: 
-      if gpt_response.split("Answer: Option")[-1].strip().lower() in ["3", "2", "1"]: 
-        return True
-      return False     
-    except:
-      return False 
 
   def __func_clean_up(gpt_response, prompt=""):
     return gpt_response.split("Answer: Option")[-1].strip().lower() 
@@ -1261,7 +1278,6 @@ def run_gpt_prompt_decide_to_react(persona, target_persona, retrieved,test_input
   def get_fail_safe(): 
     fs = "3"
     return fs
-
 
   gpt_param = {"engine": "text-davinci-003", "max_tokens": 20, 
                "temperature": 0.2, "top_p": 0.1, "stream": False,
@@ -1272,28 +1288,28 @@ def run_gpt_prompt_decide_to_react(persona, target_persona, retrieved,test_input
   prompt = generate_prompt(prompt_input, prompt_template)
 
   fail_safe = get_fail_safe()
-  output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
-                                   __func_validate, __func_clean_up)
+  max_retries = 5
+
+  for attempt in range(max_retries): # Generating response, trying to clean up response, if clean up fails it tries again until max_retries is reached
+      try:
+          output = generate_response(prompt, gpt_param)
+          if output.split("Answer: Option")[-1].strip().lower() not in ["3", "2", "1"]: 
+            raise Exception("The answer did not contain an option selection '1', '2', nor '3'")
+          output = __func_clean_up(output, prompt=prompt)
+      except Exception as e:
+          if attempt < max_retries - 1:  # i.e. if not the last attempt
+              logging.warning(f"Attempt {attempt + 1} failed with error: {e}. Retrying...")
+              continue
+          else:
+              logging.error(f"Attempt {attempt + 1} failed with error: {e}. Using failsafe: {fail_safe}.")
+              output = fail_safe
+              break
 
   if debug or verbose: 
     print_run_prompts(prompt_template, persona, gpt_param, 
                       prompt_input, prompt, output)
   
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -1393,18 +1409,10 @@ def run_gpt_prompt_create_conversation(persona, target_persona, curr_loc,
 
     return ret
 
-  def __func_validate(gpt_response, prompt=""): 
-    try: 
-      __func_clean_up(gpt_response, prompt)
-      return True
-    except:
-      return False 
-
   def get_fail_safe(init_persona, target_persona): 
     convo = [[init_persona.name, "Hi!"], 
              [target_persona.name, "Hi!"]]
     return convo
-
 
   gpt_param = {"engine": "text-davinci-003", "max_tokens": 1000, 
                "temperature": 0.7, "top_p": 0.8, "stream": False,
@@ -1415,21 +1423,26 @@ def run_gpt_prompt_create_conversation(persona, target_persona, curr_loc,
   prompt = generate_prompt(prompt_input, prompt_template)
 
   fail_safe = get_fail_safe(persona, target_persona)
-  output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
-                                   __func_validate, __func_clean_up)
+  max_retries = 5
+
+  for attempt in range(max_retries): # Generating response, trying to clean up response, if clean up fails it tries again until max_retries is reached
+      try:
+          output = generate_response(prompt, gpt_param)
+          output = __func_clean_up(output, prompt=prompt)
+      except Exception as e:
+          if attempt < max_retries - 1:  # i.e. if not the last attempt
+              logging.warning(f"Attempt {attempt + 1} failed with error: {e}. Retrying...")
+              continue
+          else:
+              logging.error(f"Attempt {attempt + 1} failed with error: {e}. Using failsafe: {fail_safe}.")
+              output = fail_safe
+              break
 
   if debug or verbose: 
     print_run_prompts(prompt_template, persona, gpt_param, 
                       prompt_input, prompt, output)
   
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
-
-
-
-
-
-
-
 
 
 
@@ -1446,13 +1459,6 @@ def run_gpt_prompt_summarize_conversation(persona, conversation, test_input=None
     ret = "conversing about " + gpt_response.strip()
     return ret
 
-  def __func_validate(gpt_response, prompt=""): 
-    try: 
-      __func_clean_up(gpt_response, prompt)
-      return True
-    except:
-      return False 
-
   def get_fail_safe(): 
     return "conversing with a housemate about morning greetings"
 
@@ -1464,8 +1470,20 @@ def run_gpt_prompt_summarize_conversation(persona, conversation, test_input=None
   prompt = generate_prompt(prompt_input, prompt_template)
 
   fail_safe = get_fail_safe()
-  output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
-                                   __func_validate, __func_clean_up)
+  max_retries = 5
+
+  for attempt in range(max_retries): # Generating response, trying to clean up response, if clean up fails it tries again until max_retries is reached
+      try:
+          output = generate_response(prompt, gpt_param)
+          output = __func_clean_up(output, prompt=prompt)
+      except Exception as e:
+          if attempt < max_retries - 1:  # i.e. if not the last attempt
+              logging.warning(f"Attempt {attempt + 1} failed with error: {e}. Retrying...")
+              continue
+          else:
+              logging.error(f"Attempt {attempt + 1} failed with error: {e}. Using failsafe: {fail_safe}.")
+              output = fail_safe
+              break
 
   if debug or verbose: 
     print_run_prompts(prompt_template, persona, gpt_param, 
@@ -1499,13 +1517,6 @@ def run_gpt_prompt_extract_keywords(persona, description, test_input=None, verbo
     print (ret)
     return set(ret)
 
-  def __func_validate(gpt_response, prompt=""): 
-    try: 
-      __func_clean_up(gpt_response, prompt)
-      return True
-    except:
-      return False 
-
   def get_fail_safe(): 
     return []
 
@@ -1517,21 +1528,26 @@ def run_gpt_prompt_extract_keywords(persona, description, test_input=None, verbo
   prompt = generate_prompt(prompt_input, prompt_template)
 
   fail_safe = get_fail_safe()
-  output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
-                                   __func_validate, __func_clean_up)
+  max_retries = 5
 
+  for attempt in range(max_retries): # Generating response, trying to clean up response, if clean up fails it tries again until max_retries is reached
+      try:
+          output = generate_response(prompt, gpt_param)
+          output = __func_clean_up(output, prompt=prompt)
+      except Exception as e:
+          if attempt < max_retries - 1:  # i.e. if not the last attempt
+              logging.warning(f"Attempt {attempt + 1} failed with error: {e}. Retrying...")
+              continue
+          else:
+              logging.error(f"Attempt {attempt + 1} failed with error: {e}. Using failsafe: {fail_safe}.")
+              output = fail_safe
+              break
 
   if debug or verbose: 
     print_run_prompts(prompt_template, persona, gpt_param, 
                       prompt_input, prompt, output)
   
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
-
-
-
-
-
-
 
 
 
@@ -1544,13 +1560,6 @@ def run_gpt_prompt_keyword_to_thoughts(persona, keyword, concept_summary, test_i
     gpt_response = gpt_response.strip()
     return gpt_response
 
-  def __func_validate(gpt_response, prompt=""): 
-    try: 
-      __func_clean_up(gpt_response, prompt)
-      return True
-    except:
-      return False 
-
   def get_fail_safe(): 
     return ""
 
@@ -1562,20 +1571,26 @@ def run_gpt_prompt_keyword_to_thoughts(persona, keyword, concept_summary, test_i
   prompt = generate_prompt(prompt_input, prompt_template)
 
   fail_safe = get_fail_safe()
-  output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
-                                   __func_validate, __func_clean_up)
+  max_retries = 5
+
+  for attempt in range(max_retries): # Generating response, trying to clean up response, if clean up fails it tries again until max_retries is reached
+      try:
+          output = generate_response(prompt, gpt_param)
+          output = __func_clean_up(output, prompt=prompt)
+      except Exception as e:
+          if attempt < max_retries - 1:  # i.e. if not the last attempt
+              logging.warning(f"Attempt {attempt + 1} failed with error: {e}. Retrying...")
+              continue
+          else:
+              logging.error(f"Attempt {attempt + 1} failed with error: {e}. Using failsafe: {fail_safe}.")
+              output = fail_safe
+              break
 
   if debug or verbose: 
     print_run_prompts(prompt_template, persona, gpt_param, 
                       prompt_input, prompt, output)
   
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
-
-
-
-
-
-
 
 
 
@@ -1599,13 +1614,6 @@ def run_gpt_prompt_convo_to_thoughts(persona,
     gpt_response = gpt_response.strip()
     return gpt_response
 
-  def __func_validate(gpt_response, prompt=""): 
-    try: 
-      __func_clean_up(gpt_response, prompt)
-      return True
-    except:
-      return False 
-
   def get_fail_safe(): 
     return ""
 
@@ -1620,38 +1628,26 @@ def run_gpt_prompt_convo_to_thoughts(persona,
   prompt = generate_prompt(prompt_input, prompt_template)
 
   fail_safe = get_fail_safe()
-  output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
-                                   __func_validate, __func_clean_up)
+  max_retries = 5
+
+  for attempt in range(max_retries): # Generating response, trying to clean up response, if clean up fails it tries again until max_retries is reached
+      try:
+          output = generate_response(prompt, gpt_param)
+          output = __func_clean_up(output, prompt=prompt)
+      except Exception as e:
+          if attempt < max_retries - 1:  # i.e. if not the last attempt
+              logging.warning(f"Attempt {attempt + 1} failed with error: {e}. Retrying...")
+              continue
+          else:
+              logging.error(f"Attempt {attempt + 1} failed with error: {e}. Using failsafe: {fail_safe}.")
+              output = fail_safe
+              break
 
   if debug or verbose: 
     print_run_prompts(prompt_template, persona, gpt_param, 
                       prompt_input, prompt, output)
   
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -1667,13 +1663,6 @@ def run_gpt_prompt_event_poignancy(persona, event_description, test_input=None, 
     gpt_response = int(gpt_response.strip())
     return gpt_response
 
-  def __func_validate(gpt_response, prompt=""): 
-    try: 
-      __func_clean_up(gpt_response, prompt)
-      return True
-    except:
-      return False 
-
   def get_fail_safe(): 
     return 4
 
@@ -1685,14 +1674,118 @@ def run_gpt_prompt_event_poignancy(persona, event_description, test_input=None, 
   prompt = generate_prompt(prompt_input, prompt_template)
 
   fail_safe = get_fail_safe()
-  output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
-                                  __func_validate, __func_clean_up)
+  max_retries = 5
+
+  for attempt in range(max_retries): # Generating response, trying to clean up response, if clean up fails it tries again until max_retries is reached
+      try:
+          output = generate_response(prompt, gpt_param)
+          output = __func_clean_up(output, prompt=prompt)
+      except Exception as e:
+          if attempt < max_retries - 1:  # i.e. if not the last attempt
+              logging.warning(f"Attempt {attempt + 1} failed with error: {e}. Retrying...")
+              continue
+          else:
+              logging.error(f"Attempt {attempt + 1} failed with error: {e}. Using failsafe: {fail_safe}.")
+              output = fail_safe
+              break
+          
   if debug or verbose: 
     print_run_prompts(prompt_template, persona, gpt_param, 
                       prompt_input, prompt, output)
     
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
+
+
+def run_gpt_prompt_thought_poignancy(persona, event_description, test_input=None, verbose=False): 
+  def create_prompt_input(persona, event_description, test_input=None): 
+    prompt_input = [persona.scratch.name,
+                    persona.scratch.get_str_iss(),
+                    persona.scratch.name,
+                    event_description]
+    return prompt_input
+  
+  def __func_clean_up(gpt_response, prompt=""):
+    gpt_response = int(gpt_response.strip())
+    return gpt_response
+
+  def get_fail_safe(): 
+    return 4
+
+  gpt_param = {"engine": "text-davinci-003", "max_tokens": 3, 
+               "temperature": 0.2, "top_p": 0.1, "stream": False,
+               "frequency_penalty": 0, "presence_penalty": 0, "stop": None}
+  prompt_template = "persona/prompt_template/v2/poignancy_thought_v1.txt"
+  prompt_input = create_prompt_input(persona, event_description)
+  prompt = generate_prompt(prompt_input, prompt_template)
+
+  fail_safe = get_fail_safe()
+  max_retries = 5
+
+  for attempt in range(max_retries): # Generating response, trying to clean up response, if clean up fails it tries again until max_retries is reached
+      try:
+          output = generate_response(prompt, gpt_param)
+          output = __func_clean_up(output, prompt=prompt)
+      except Exception as e:
+          if attempt < max_retries - 1:  # i.e. if not the last attempt
+              logging.warning(f"Attempt {attempt + 1} failed with error: {e}. Retrying...")
+              continue
+          else:
+              logging.error(f"Attempt {attempt + 1} failed with error: {e}. Using failsafe: {fail_safe}.")
+              output = fail_safe
+              break
+
+  if debug or verbose: 
+    print_run_prompts(prompt_template, persona, gpt_param, 
+                      prompt_input, prompt, output)
+  
+  return output, [output, prompt, gpt_param, prompt_input, fail_safe]
+
+
+
+def run_gpt_prompt_chat_poignancy(persona, event_description, test_input=None, verbose=False): 
+  def create_prompt_input(persona, event_description, test_input=None): 
+    prompt_input = [persona.scratch.name,
+                    persona.scratch.get_str_iss(),
+                    persona.scratch.name,
+                    event_description]
+    return prompt_input
+  
+  def __func_clean_up(gpt_response, prompt=""):
+    gpt_response = int(gpt_response.strip())
+    return gpt_response
+
+  def get_fail_safe(): 
+    return 4
+
+  gpt_param = {"engine": "text-davinci-003", "max_tokens": 3, 
+               "temperature": 0.2, "top_p": 0.1, "stream": False,
+               "frequency_penalty": 0, "presence_penalty": 0, "stop": None}
+  prompt_template = "persona/prompt_template/v2/poignancy_chat_v1.txt"
+  prompt_input = create_prompt_input(persona, event_description)
+  prompt = generate_prompt(prompt_input, prompt_template)
+
+  fail_safe = get_fail_safe()
+  max_retries = 5
+
+  for attempt in range(max_retries): # Generating response, trying to clean up response, if clean up fails it tries again until max_retries is reached
+      try:
+          output = generate_response(prompt, gpt_param)
+          output = __func_clean_up(output, prompt=prompt)
+      except Exception as e:
+          if attempt < max_retries - 1:  # i.e. if not the last attempt
+              logging.warning(f"Attempt {attempt + 1} failed with error: {e}. Retrying...")
+              continue
+          else:
+              logging.error(f"Attempt {attempt + 1} failed with error: {e}. Using failsafe: {fail_safe}.")
+              output = fail_safe
+              break
+
+  if debug or verbose: 
+    print_run_prompts(prompt_template, persona, gpt_param, 
+                      prompt_input, prompt, output)
+  
+  return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
 
 
@@ -1708,13 +1801,6 @@ def run_gpt_prompt_focal_pt(persona, statements, n, test_input=None, verbose=Fal
       ret += [i.split(") ")[-1]]
     return ret
 
-  def __func_validate(gpt_response, prompt=""): 
-    try: 
-      __func_clean_up(gpt_response, prompt)
-      return True
-    except:
-      return False 
-
   def get_fail_safe(n): 
     return ["Who am I"] * n
 
@@ -1726,16 +1812,26 @@ def run_gpt_prompt_focal_pt(persona, statements, n, test_input=None, verbose=Fal
   prompt = generate_prompt(prompt_input, prompt_template)
 
   fail_safe = get_fail_safe(n)
-  output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
-                                   __func_validate, __func_clean_up)
+  max_retries = 5
+
+  for attempt in range(max_retries): # Generating response, trying to clean up response, if clean up fails it tries again until max_retries is reached
+      try:
+          output = generate_response(prompt, gpt_param)
+          output = __func_clean_up(output, prompt=prompt)
+      except Exception as e:
+          if attempt < max_retries - 1:  # i.e. if not the last attempt
+              logging.warning(f"Attempt {attempt + 1} failed with error: {e}. Retrying...")
+              continue
+          else:
+              logging.error(f"Attempt {attempt + 1} failed with error: {e}. Using failsafe: {fail_safe}.")
+              output = fail_safe
+              break
 
   if debug or verbose: 
     print_run_prompts(prompt_template, persona, gpt_param, 
                       prompt_input, prompt, output)
   
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
-
-
 
 
   
@@ -1756,13 +1852,6 @@ def run_gpt_prompt_insight_and_guidance(persona, statements, n, test_input=None,
       ret[thought] = evi_raw
     return ret
 
-  def __func_validate(gpt_response, prompt=""): 
-    try: 
-      __func_clean_up(gpt_response, prompt)
-      return True
-    except:
-      return False 
-
   def get_fail_safe(n): 
     return ["I am hungry"] * n
 
@@ -1774,19 +1863,26 @@ def run_gpt_prompt_insight_and_guidance(persona, statements, n, test_input=None,
   prompt = generate_prompt(prompt_input, prompt_template)
 
   fail_safe = get_fail_safe(n)
-  output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
-                                   __func_validate, __func_clean_up)
+  max_retries = 5
+
+  for attempt in range(max_retries): # Generating response, trying to clean up response, if clean up fails it tries again until max_retries is reached
+      try:
+          output = generate_response(prompt, gpt_param)
+          output = __func_clean_up(output, prompt=prompt)
+      except Exception as e:
+          if attempt < max_retries - 1:  # i.e. if not the last attempt
+              logging.warning(f"Attempt {attempt + 1} failed with error: {e}. Retrying...")
+              continue
+          else:
+              logging.error(f"Attempt {attempt + 1} failed with error: {e}. Using failsafe: {fail_safe}.")
+              output = fail_safe
+              break
 
   if debug or verbose: 
     print_run_prompts(prompt_template, persona, gpt_param, 
                       prompt_input, prompt, output)
   
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
-
-
-
-
-
 
 
 
@@ -1799,13 +1895,6 @@ def run_gpt_prompt_agent_chat_summarize_ideas(persona, target_persona, statement
   def __func_clean_up(gpt_response, prompt=""):
     return gpt_response.split('"')[0].strip()
 
-  def __func_validate(gpt_response, prompt=""): 
-    try: 
-      __func_clean_up(gpt_response, prompt)
-      return True
-    except:
-      return False 
-
   def get_fail_safe(): 
     return "..."
 
@@ -1817,8 +1906,20 @@ def run_gpt_prompt_agent_chat_summarize_ideas(persona, target_persona, statement
   prompt = generate_prompt(prompt_input, prompt_template)
 
   fail_safe = get_fail_safe()
-  output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
-                                  __func_validate, __func_clean_up)
+  max_retries = 5
+
+  for attempt in range(max_retries): # Generating response, trying to clean up response, if clean up fails it tries again until max_retries is reached
+      try:
+          output = generate_response(prompt, gpt_param)
+          output = __func_clean_up(output, prompt=prompt)
+      except Exception as e:
+          if attempt < max_retries - 1:  # i.e. if not the last attempt
+              logging.warning(f"Attempt {attempt + 1} failed with error: {e}. Retrying...")
+              continue
+          else:
+              logging.error(f"Attempt {attempt + 1} failed with error: {e}. Using failsafe: {fail_safe}.")
+              output = fail_safe
+              break
 
   if debug or verbose: 
     print_run_prompts(prompt_template, persona, gpt_param, 
@@ -1826,7 +1927,6 @@ def run_gpt_prompt_agent_chat_summarize_ideas(persona, target_persona, statement
      
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
   
-
 
 
 def run_gpt_prompt_agent_chat_summarize_relationship(persona, target_persona, statements, test_input=None, verbose=False): 
@@ -1837,26 +1937,31 @@ def run_gpt_prompt_agent_chat_summarize_relationship(persona, target_persona, st
   def __func_clean_up(gpt_response, prompt=""):
     return gpt_response.split('"')[0].strip()
 
-  def __func_validate(gpt_response, prompt=""): 
-    try: 
-      __func_clean_up(gpt_response, prompt)
-      return True
-    except:
-      return False 
-
   def get_fail_safe(): 
     return "..."
 
   gpt_param = {"engine": "text-davinci-003", "max_tokens": 150, 
-               "temperature": 0.5, "top_p": 0.5, "stream": False,
+               "temperature": 0.7, "top_p": 0.8, "stream": False,
                "frequency_penalty": 0, "presence_penalty": 0, "stop": None}
   prompt_template = "persona/prompt_template/v2/summarize_chat_relationship_v1.txt"
   prompt_input = create_prompt_input(persona, target_persona, statements)
   prompt = generate_prompt(prompt_input, prompt_template)
 
   fail_safe = get_fail_safe()
-  output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
-                                   __func_validate, __func_clean_up)
+  max_retries = 5
+
+  for attempt in range(max_retries): # Generating response, trying to clean up response, if clean up fails it tries again until max_retries is reached
+      try:
+          output = generate_response(prompt, gpt_param)
+          output = __func_clean_up(output, prompt=prompt)
+      except Exception as e:
+          if attempt < max_retries - 1:  # i.e. if not the last attempt
+              logging.warning(f"Attempt {attempt + 1} failed with error: {e}. Retrying...")
+              continue
+          else:
+              logging.error(f"Attempt {attempt + 1} failed with error: {e}. Using failsafe: {fail_safe}.")
+              output = fail_safe
+              break
 
   if debug or verbose: 
     print_run_prompts(prompt_template, persona, gpt_param, 
@@ -1864,8 +1969,6 @@ def run_gpt_prompt_agent_chat_summarize_relationship(persona, target_persona, st
     
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
   
-
-
 
 
 def run_gpt_prompt_agent_chat(maze, persona, target_persona,
@@ -1929,15 +2032,6 @@ def run_gpt_prompt_agent_chat(maze, persona, target_persona,
 
     return ret
 
-
-
-  def __func_validate(gpt_response, prompt=""): 
-    try: 
-      __func_clean_up(gpt_response, prompt)
-      return True
-    except:
-      return False 
-
   def get_fail_safe(): 
     return "..."
 
@@ -1949,19 +2043,26 @@ def run_gpt_prompt_agent_chat(maze, persona, target_persona,
   prompt = generate_prompt(prompt_input, prompt_template)
 
   fail_safe = get_fail_safe()
-  output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
-                                   __func_validate, __func_clean_up)
+  max_retries = 5
+
+  for attempt in range(max_retries): # Generating response, trying to clean up response, if clean up fails it tries again until max_retries is reached
+      try:
+          output = generate_response(prompt, gpt_param)
+          output = __func_clean_up(output, prompt=prompt)
+      except Exception as e:
+          if attempt < max_retries - 1:  # i.e. if not the last attempt
+              logging.warning(f"Attempt {attempt + 1} failed with error: {e}. Retrying...")
+              continue
+          else:
+              logging.error(f"Attempt {attempt + 1} failed with error: {e}. Using failsafe: {fail_safe}.")
+              output = fail_safe
+              break
 
   if debug or verbose: 
     print_run_prompts(prompt_template, persona, gpt_param, 
                       prompt_input, prompt, output)
     
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
-
-
-
-
-
 
 
 
@@ -1973,26 +2074,31 @@ def run_gpt_prompt_summarize_ideas(persona, statements, question, test_input=Non
   def __func_clean_up(gpt_response, prompt=""):
     return gpt_response.split('"')[0].strip()
 
-  def __func_validate(gpt_response, prompt=""): 
-    try: 
-      __func_clean_up(gpt_response, prompt)
-      return True
-    except:
-      return False 
-
   def get_fail_safe(): 
     return "..."
 
   gpt_param = {"engine": "text-davinci-003", "max_tokens": 150, 
-               "temperature": 0.5, "top_p": 1, "stream": False,
+               "temperature": 0.5, "top_p": 0.5, "stream": False,
                "frequency_penalty": 0, "presence_penalty": 0, "stop": None}
   prompt_template = "persona/prompt_template/v2/summarize_ideas_v1.txt"
   prompt_input = create_prompt_input(persona, statements, question)
   prompt = generate_prompt(prompt_input, prompt_template)
 
   fail_safe = get_fail_safe()
-  output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
-                                   __func_validate, __func_clean_up)
+  max_retries = 5
+
+  for attempt in range(max_retries): # Generating response, trying to clean up response, if clean up fails it tries again until max_retries is reached
+      try:
+          output = generate_response(prompt, gpt_param)
+          output = __func_clean_up(output, prompt=prompt)
+      except Exception as e:
+          if attempt < max_retries - 1:  # i.e. if not the last attempt
+              logging.warning(f"Attempt {attempt + 1} failed with error: {e}. Retrying...")
+              continue
+          else:
+              logging.error(f"Attempt {attempt + 1} failed with error: {e}. Using failsafe: {fail_safe}.")
+              output = fail_safe
+              break
 
   if debug or verbose: 
     print_run_prompts(prompt_template, persona, gpt_param, 
@@ -2000,7 +2106,6 @@ def run_gpt_prompt_summarize_ideas(persona, statements, question, test_input=Non
     
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
  
-
 
 
 def run_gpt_prompt_generate_next_convo_line(persona, interlocutor_desc, prev_convo, retrieved_summary, test_input=None, verbose=False): 
@@ -2018,13 +2123,6 @@ def run_gpt_prompt_generate_next_convo_line(persona, interlocutor_desc, prev_con
   def __func_clean_up(gpt_response, prompt=""):
     return gpt_response.split('"')[0].strip()
 
-  def __func_validate(gpt_response, prompt=""): 
-    try: 
-      __func_clean_up(gpt_response, prompt)
-      return True
-    except:
-      return False 
-
   def get_fail_safe(): 
     return "..."
 
@@ -2036,17 +2134,26 @@ def run_gpt_prompt_generate_next_convo_line(persona, interlocutor_desc, prev_con
   prompt = generate_prompt(prompt_input, prompt_template)
 
   fail_safe = get_fail_safe()
-  output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
-                                   __func_validate, __func_clean_up)
+  max_retries = 5
+
+  for attempt in range(max_retries): # Generating response, trying to clean up response, if clean up fails it tries again until max_retries is reached
+      try:
+          output = generate_response(prompt, gpt_param)
+          output = __func_clean_up(output, prompt=prompt)
+      except Exception as e:
+          if attempt < max_retries - 1:  # i.e. if not the last attempt
+              logging.warning(f"Attempt {attempt + 1} failed with error: {e}. Retrying...")
+              continue
+          else:
+              logging.error(f"Attempt {attempt + 1} failed with error: {e}. Using failsafe: {fail_safe}.")
+              output = fail_safe
+              break
 
   if debug or verbose: 
     print_run_prompts(prompt_template, persona, gpt_param, 
                       prompt_input, prompt, output)
     
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
-
-
-
 
 
 
@@ -2057,13 +2164,6 @@ def run_gpt_prompt_generate_whisper_inner_thought(persona, whisper, test_input=N
   
   def __func_clean_up(gpt_response, prompt=""):
     return gpt_response.split('"')[0].strip()
-
-  def __func_validate(gpt_response, prompt=""): 
-    try: 
-      __func_clean_up(gpt_response, prompt)
-      return True
-    except:
-      return False 
 
   def get_fail_safe(): 
     return "..."
@@ -2076,8 +2176,20 @@ def run_gpt_prompt_generate_whisper_inner_thought(persona, whisper, test_input=N
   prompt = generate_prompt(prompt_input, prompt_template)
 
   fail_safe = get_fail_safe()
-  output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
-                                   __func_validate, __func_clean_up)
+  max_retries = 5
+
+  for attempt in range(max_retries): # Generating response, trying to clean up response, if clean up fails it tries again until max_retries is reached
+      try:
+          output = generate_response(prompt, gpt_param)
+          output = __func_clean_up(output, prompt=prompt)
+      except Exception as e:
+          if attempt < max_retries - 1:  # i.e. if not the last attempt
+              logging.warning(f"Attempt {attempt + 1} failed with error: {e}. Retrying...")
+              continue
+          else:
+              logging.error(f"Attempt {attempt + 1} failed with error: {e}. Using failsafe: {fail_safe}.")
+              output = fail_safe
+              break
 
   if debug or verbose: 
     print_run_prompts(prompt_template, persona, gpt_param, 
@@ -2095,13 +2207,6 @@ def run_gpt_prompt_planning_thought_on_convo(persona, all_utt, test_input=None, 
   def __func_clean_up(gpt_response, prompt=""):
     return gpt_response.split('"')[0].strip()
 
-  def __func_validate(gpt_response, prompt=""): 
-    try: 
-      __func_clean_up(gpt_response, prompt)
-      return True
-    except:
-      return False 
-
   def get_fail_safe(): 
     return "..."
 
@@ -2113,8 +2218,20 @@ def run_gpt_prompt_planning_thought_on_convo(persona, all_utt, test_input=None, 
   prompt = generate_prompt(prompt_input, prompt_template)
 
   fail_safe = get_fail_safe()
-  output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
-                                   __func_validate, __func_clean_up)
+  max_retries = 5
+
+  for attempt in range(max_retries): # Generating response, trying to clean up response, if clean up fails it tries again until max_retries is reached
+      try:
+          output = generate_response(prompt, gpt_param)
+          output = __func_clean_up(output, prompt=prompt)
+      except Exception as e:
+          if attempt < max_retries - 1:  # i.e. if not the last attempt
+              logging.warning(f"Attempt {attempt + 1} failed with error: {e}. Retrying...")
+              continue
+          else:
+              logging.error(f"Attempt {attempt + 1} failed with error: {e}. Using failsafe: {fail_safe}.")
+              output = fail_safe
+              break
 
   if debug or verbose: 
     print_run_prompts(prompt_template, persona, gpt_param, 
@@ -2132,13 +2249,6 @@ def run_gpt_prompt_memo_on_convo(persona, all_utt, test_input=None, verbose=Fals
   def __func_clean_up(gpt_response, prompt=""):
     return gpt_response.split('"')[0].strip()
 
-  def __func_validate(gpt_response, prompt=""): 
-    try: 
-      __func_clean_up(gpt_response, prompt)
-      return True
-    except:
-      return False 
-
   def get_fail_safe(): 
     return "..."
 
@@ -2150,55 +2260,25 @@ def run_gpt_prompt_memo_on_convo(persona, all_utt, test_input=None, verbose=Fals
   prompt = generate_prompt(prompt_input, prompt_template)
 
   fail_safe = get_fail_safe()
-  output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
-                                   __func_validate, __func_clean_up)
+  max_retries = 5
+
+  for attempt in range(max_retries): # Generating response, trying to clean up response, if clean up fails it tries again until max_retries is reached
+      try:
+          output = generate_response(prompt, gpt_param)
+          output = __func_clean_up(output, prompt=prompt)
+      except Exception as e:
+          if attempt < max_retries - 1:  # i.e. if not the last attempt
+              logging.warning(f"Attempt {attempt + 1} failed with error: {e}. Retrying...")
+              continue
+          else:
+              logging.error(f"Attempt {attempt + 1} failed with error: {e}. Using failsafe: {fail_safe}.")
+              output = fail_safe
+              break
 
   if debug or verbose: 
     print_run_prompts(prompt_template, persona, gpt_param, 
                       prompt_input, prompt, output)
   
-  return output, [output, prompt, gpt_param, prompt_input, fail_safe]
-
-
-
-
-def run_gpt_generate_safety_score(persona, comment, test_input=None, verbose=False): 
-  def create_prompt_input(comment, test_input=None):
-    prompt_input = [comment]
-    return prompt_input
-
-  def __chat_func_clean_up(gpt_response, prompt=""): 
-    gpt_response = json.loads(gpt_response)
-    return gpt_response["output"]
-
-  def __chat_func_validate(gpt_response, prompt=""): 
-    try: 
-      fields = ["output"]
-      response = json.loads(gpt_response)
-      for field in fields: 
-        if field not in response: 
-          return False
-      return True
-    except:
-      return False 
-
-  def get_fail_safe():
-    return None
-
-  print ("11")
-  prompt_template = "persona/prompt_template/safety/anthromorphosization_v1.txt" 
-  prompt_input = create_prompt_input(comment) 
-  print ("22")
-  prompt = generate_prompt(prompt_input, prompt_template)
-  print (prompt)
-  fail_safe = get_fail_safe() 
-  output = ChatGPT_safe_generate_response_OLD(prompt, 3, fail_safe,
-                        __chat_func_validate, __chat_func_clean_up, verbose)
-  print (output)
-  
-  gpt_param = {"engine": "text-davinci-003", "max_tokens": 50, 
-               "temperature": 0.2, "top_p": 0.1, "stream": False,
-               "frequency_penalty": 0, "presence_penalty": 0, "stop": None}
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
 
@@ -2220,8 +2300,9 @@ def extract_first_json_dict(data_str):
         json_dict = json.loads(json_str)
         return json_dict
     except json.JSONDecodeError:
-        # If parsing fails, return None
+        logging.critical("JSON Decode Error: extract_first_json_dict")
         return None
+
 
 
 def run_gpt_generate_iterative_chat_utt(maze, init_persona, target_persona, retrieved, curr_context, curr_chat, test_input=None, verbose=False): 
@@ -2250,12 +2331,11 @@ def run_gpt_generate_iterative_chat_utt(maze, init_persona, target_persona, retr
       for v in vals: 
         retrieved_str += f"- {v.description}\n"
 
-
     convo_str = ""
     for i in curr_chat:
       convo_str += ": ".join(i) + "\n"
     if convo_str == "": 
-      convo_str = "[The conversation has not started yet -- start it!]"
+      convo_str = "[This feels awkward, they're just staring at each other, start talking!]"
 
     init_iss = f"Here is Here is a brief description of {init_persona.scratch.name}.\n{init_persona.scratch.get_str_iss()}"
     prompt_input = [init_iss, init_persona.scratch.name, retrieved_str, prev_convo_insert,
@@ -2280,20 +2360,6 @@ def run_gpt_generate_iterative_chat_utt(maze, init_persona, target_persona, retr
 
     return cleaned_dict
 
-  def __chat_func_validate(gpt_response, prompt=""): 
-    print ("ugh...")
-    try: 
-      # print ("debug 1")
-      # print (gpt_response)
-      # print ("debug 2")
-
-      print (extract_first_json_dict(gpt_response))
-      # print ("debug 3")
-
-      return True
-    except:
-      return False 
-
   def get_fail_safe():
     cleaned_dict = dict()
     cleaned_dict["utterance"] = "..."
@@ -2307,11 +2373,24 @@ def run_gpt_generate_iterative_chat_utt(maze, init_persona, target_persona, retr
   prompt = generate_prompt(prompt_input, prompt_template)
   print (prompt)
   fail_safe = get_fail_safe() 
-  output = ChatGPT_safe_generate_response_OLD(prompt, 3, fail_safe,
-                        __chat_func_validate, __chat_func_clean_up, verbose)
+  max_retries = 5
+
+  for attempt in range(max_retries): # Generating response, trying to clean up response, if clean up fails it tries again until max_retries is reached
+      try:
+          output = generate_response(prompt, gpt_param)
+          output = __chat_func_clean_up(output, prompt=prompt)
+      except Exception as e:
+          if attempt < max_retries - 1:  # i.e. if not the last attempt
+              logging.warning(f"Attempt {attempt + 1} failed with error: {e}. Retrying...")
+              continue
+          else:
+              logging.error(f"Attempt {attempt + 1} failed with error: {e}. Using failsafe: {fail_safe}.")
+              output = fail_safe
+              break
+          
   print (output)
   
-  gpt_param = {"engine": "text-davinci-003", "max_tokens": 50, 
-               "temperature": 0.2, "top_p": 0.1, "stream": False,
+  gpt_param = {"engine": "text-davinci-003", "max_tokens": 500, 
+               "temperature": 0.5, "top_p": 0.5, "stream": False,
                "frequency_penalty": 0, "presence_penalty": 0, "stop": None}
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
