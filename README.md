@@ -58,7 +58,7 @@ Be patient! It might take a while until the front_end loads up properly, this is
 
 
 Access the current frontend in your browser here: http://127.0.0.1:8000/simulator_home
-Access previous simulations in your browser here (frontend still needs to be running): http://localhost:8000/replay/<simulation-name>/<starting-time-step>
+Access previous simulations in your browser here (frontend still needs to be running): http://localhost:8000/replay/simulation-name/starting-time-step
 
 
 Have you had any issues? Post them here on GitHub with the appropriate 'tag'. We'll try and get around to fixing them as quickly as we can! (This may not be particularly quick until we have more people helping us)
