@@ -1,11 +1,11 @@
 # OSGA (Open-Source Generative Agents)
 
-Open-Source Generative Agents (OSGA) is a community-driven derivative of 'Generative Agents.' Our mission is to:
+Welcome to Open-Source Generative Agents (OSGA), a community-driven initiative that builds upon the foundation of 'Generative Agents'. Our ethos revolves around the following pillars:
 
-- Enable compatibility with open-source Large Language Models.
-- Enhance performance, methods, and adaptability.
-- Introduce new, optional features.
-- Provide a centralised repository for OSGA-related projects.
+- **Compatibility**: Ensuring seamless integration with open-source Large Language Models.
+- **Innovation**: Continuously enhancing performance, methodologies, and adaptability.
+- **Expansion**: Rolling out novel, optional features to enrich user experience.
+- **Centralisation**: Offering a consolidated repository for all OSGA-associated endeavours.
 
 ## Citation
 
@@ -26,69 +26,63 @@ series = {UIST '23}
 
 ## Environment
 
-Tested on Python 3.11. (Note: Please check for backward compatibility.)
+- **Compatibility**: The system has been rigorously tested on Python 3.11. However, if you're using an older version, do ensure backward compatibility.
 
 ## Configuration
 
-Update `utils.py` within reverie with the appropriate HTTP call. For example:
+To start, you need to configure `utils.py` inside the `reverie` directory:
 
-Update this line with your HTTP call:
-base_api_url = "your_http_call_here"
-e.g.
-base_api_url = HTTP://localhost:8000/v1 #For hosting the model on the same system that is communicating with the model.
+```python
+base_api_url = "your_http_call_here"  # Replace with your specific HTTP call
+# For instance:
+base_api_url = "http://localhost:8000/v1"  # If the model resides on the same system initiating the communication.
+```
 
-## How to use
+## Usage Guide
 
-Run the "install requirements.bat" file to install the required Python dependencies.
+1. **Setup**: Execute the `install requirements.bat` file. This will handle all necessary Python dependencies.
+2. **Launching**: Activate the servers (both frontend and backend) by running `start.bat`.
+3. **Simulation Selection**: When prompted, input the name of a pre-existing simulation (corresponding to a folder name) located at `OSGA\main\environment\frontend_server\storage`. This becomes the genesis point for your simulation.
+4. **Fork Naming**: Specify a unique name for your fork. This name will represent your simulation in the storage directory.
+5. **Simulation Duration**: To dictate the duration of your simulation, use commands like `run 6000`. Here, the integer represents steps, where 1 in-game hour equates to 360 steps.
+6. **Continuation**: If you wish to extend a paused simulation, initiate a new fork from your previous state. This requires terminating the prior frontend and backend processes and then launching fresh ones.
 
+**Important Notes**:
+- Upon executing, grant the frontend sufficient time to load. Initial actions by the personas might cause minor delays.
+- Refrain from refreshing the frontend page as it could potentially halt the backend simulation. The root cause of this issue is under investigation.
+- Navigate the simulator GUI using your keyboard's arrow keys.
+- **Access Points**:
+  - Simulator Home: [http://127.0.0.1:8000/simulator_home](http://127.0.0.1:8000/simulator_home)
+  - Past Simulations (ensure frontend is active): [http://localhost:8000/replay/simulation-name/starting-time-step](http://localhost:8000/replay/simulation-name/starting-time-step)
 
-Run "start.bat" to start the servers up (frontend and backend). 
+Facing issues? Raise them on our GitHub, ensuring you tag them appropriately. We endeavour to address them promptly. Please bear with us during peak times as our response rate might be slightly delayed.
 
-  When it asks for you to enter the name of a forked simulation to continue from, enter the name of one of the simulations (name of one of the folders) from OSGA\main\environment\frontend_server\storage. 
-  This will give you a starting point to run your simulation.
+## Engage with our Community
 
-  Follow this up with whatever you want your fork to be called (and saved as in the storage directory)
+We believe in the power of collaboration. Engage in vibrant discussions, share ideas, and explore potential partnerships on our [Discord platform](https://discord.gg/GefGyX4qT6).
 
-  You can then use run 6000 (or any other integer, multiply this value by 10 and you get the number of in-game seconds that the simulation is running for). For instance, 1hr in game = 360 steps
-  
-  If it pauses and you want to run it further, you can continue the simulation with a new fork of your old version (by closing the old frontend and backend, then loading new ones).
+## Contribute to OSGA
 
+Your insights are invaluable. Here's why you should consider contributing:
 
-Be patient! It might take a while until the front_end loads up properly, this is because the first actions have to be completed by the personas first!
-Once you have loaded the front end, don't refresh the page as it may pause the simulation backend (the reason this is happening is currently unknown).
-You can move around the simulator GUI using arrow keys.
+- **Collective Growth**: Hosting projects within our ecosystem fosters shared learning and collective enhancement.
+- **Knowledge Hub**: Our vision is to establish a nexus of derivative projects, propelling innovation in generative agent systems.
 
-Access the current front end in your browser here: http://127.0.0.1:8000/simulator_home
-Access previous simulations in your browser here (frontend still needs to be running): http://localhost:8000/replay/simulation-name/starting-time-step
+If our mission resonates with you, and you're keen to contribute or host your project, please connect with us on Discord, sharing your GitHub username. Post a review, we'll onboard you as a contributor and showcase your work on a test branch, ensuring it aligns with our standards.
 
+## Potential Applications
 
-Have you had any issues? Post them here on GitHub with the appropriate 'tag'. We'll try to get around to fixing them as quickly as we can! (This may not be particularly quick until we have more people helping us)
+Embarking on a project and seeking inspiration? Here are some avenues to explore:
 
-## Community
-
-Join our community to discuss projects, ideas, and collaboration: [Discord Link](https://discord.gg/GefGyX4qT6)
-
-## Contribution
-
-We encourage contributions that can help expand the capabilities of generative agents. To foster a collaborative environment, we also invite you to host your OSGA-related projects right here on our GitHub repository.
-If you're interested in contributing or hosting your project, reach out on our Discord server with your GitHub username. We'll add you as a contributor and host your work on a test branch until everyone is satisfied with its stability.
-
-### Why Contribute?
-
-- **Collaborative Enhancement**: Hosting your project here allows everyone to learn from and improve upon each other's work.
-- **Centralised Knowledge**: We aim to create a hub of derivative projects to accelerate innovation in generative agent systems.
-
-## Ideas of Possible Usage
-
-Here are some potential applications to get you started:
-
-- **Benchmarking of Large Language Models (LLMs)**
-  - **Character Representation**: Test how well LLMs can portray characters based on written character sheets.
-  - **Socialising**: Evaluate the LLM's ability to engage in realistic and meaningful social interactions.
-  - **World Interaction**: Assess logical decision-making by LLMs when interacting with various world elements.
+- **Benchmarking Large Language Models (LLMs)**
+  - **Character Representation**: Gauge the proficiency of LLMs in crafting character portrayals based on detailed character sheets.
+  - **Social Dynamics**: Analyse the prowess of LLMs in orchestrating authentic and profound social dialogues.
+  - **World Engagement**: Investigate the logical reasoning abilities of LLMs when they interface with diverse world constituents.
 
 - **Role-Playing Games (RPGs)**
-  - **Custom Engines**: Integrate generative agents into your own game engine to create more dynamic and responsive characters.
-  - **Existing Engines**: Develop extensions for popular game engines to include generative agents.
+  - **Bespoke Engines**: Integrate generative agents within proprietary game engines, infusing characters with dynamism and reactivity.
+  - **Popular Engines**: Craft plugins for renowned game engines, integrating the capabilities of generative agents.
 
-- **And More!**: The possibilities are endless. We're excited to see what you'll bring to this collaborative platform.
+- **The Horizon is Limitless**: Our platform is a canvas, and we eagerly anticipate the masterpieces you'll conceive.
+
+Authored By: Elliott Dyson
