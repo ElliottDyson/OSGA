@@ -244,9 +244,6 @@ def generate_action_pronunciation(act_desp, persona):
     x = run_gpt_prompt_pronunciation(act_desp, persona)[0]
   except: 
     x = "🙂"
-
-  if not x: 
-    return "🙂"
   return x
 
 

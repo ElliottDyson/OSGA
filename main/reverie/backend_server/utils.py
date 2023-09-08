@@ -1,6 +1,6 @@
 openai_api_key = "something" #keep as is, the only reason it isn't "", is because we need to return "some" string.
 """ngrok for public IP addresses of externally hosted notebook instances - localhost:8000 for locally hosted instances"""
-base_api_url = "https://04a6-34-143-230-199.ngrok-free.app/v1"   #   "https://YOUR_NEW_API_ENDPOINT/v1" must end in /v1 due to the nature of llama-cpp-python
+base_api_url = "http://c5b0-34-171-95-246.ngrok-free.app/v1"   #   "https://YOUR_NEW_API_ENDPOINT/v1" must end in /v1 due to the nature of llama-cpp-python
 
 model_name = "model"
 

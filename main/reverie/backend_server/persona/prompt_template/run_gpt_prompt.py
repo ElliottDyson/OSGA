@@ -70,7 +70,12 @@ def run_gpt_prompt_wake_up_hour(persona, test_input=None, verbose=False):
     return prompt_input
 
   def __func_clean_up(gpt_response, prompt=""):
-    cr = int(gpt_response.strip().lower().split("am")[0])
+    cleaned_response = gpt_response.lower().strip()
+    if "am" in cleaned_response:
+        cleaned_response = cleaned_response.split("am")[0].strip()  # Remove the 'am'
+    if ":" in cleaned_response:
+        cleaned_response = cleaned_response.split(":")[0].strip()  # Extract the hour portion
+    cr = int(cleaned_response)
     return cr
 
   def get_fail_safe(): 
@@ -568,8 +573,6 @@ def run_gpt_prompt_action_sector(action_description,
           output = generate_response(prompt, gpt_param)
           if "}" not in output:
             raise Exception("'}' was not found in the response")
-          if "," not in output:
-            raise Exception("',' was not found in the response")
           if len(output.strip()) < 1: 
             raise Exception("The length of the stripped output was less than 1")
           output = __func_clean_up(output, prompt=prompt)
@@ -670,8 +673,6 @@ def run_gpt_prompt_action_arena(action_description,
           output = generate_response(prompt, gpt_param)
           if "}" not in output:
             raise Exception("'}' was not found in the response")
-          if "," not in output:
-            raise Exception("',' was not found in the response")
           if len(output.strip()) < 1: 
             raise Exception("The length of the stripped output was less than 1")
           output = __func_clean_up(output, prompt=prompt)
@@ -764,7 +765,7 @@ def run_gpt_prompt_action_game_object(action_description,
 
 
 
-def run_gpt_prompt_pronunciation(action_description, persona, verbose=True): 
+def run_gpt_prompt_pronunciation(action_description, persona, verbose=False): 
   def create_prompt_input(action_description): 
     if "(" in action_description: 
       action_description = action_description.split("(")[-1].split(")")[0]
@@ -805,8 +806,11 @@ def run_gpt_prompt_pronunciation(action_description, persona, verbose=True):
               output = fail_safe
               break
 
-  if output != False: 
-    return output, [output, prompt, gpt_param, prompt_input, fail_safe]
+  if debug or verbose: 
+      print_run_prompts(prompt_template, persona, gpt_param, 
+                        prompt_input, prompt, output)
+
+  return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
 
 
