@@ -1,5 +1,6 @@
 """
-Author: Joon Sung Park (joonspk@stanford.edu)
+Original Author: Joon Sung Park (joonspk@stanford.edu)
+New Authors/Editors: OSGA Community, OSGA Community Organiser: Elliott Dyson (elliottdysondesigns@gmail.com)
 
 File: persona.py
 Description: Defines the Persona class that powers the agents in Reverie. 
@@ -162,7 +163,7 @@ class Persona:
     OUTPUT: 
       execution: A triple set that contains the following components: 
         <next_tile> is a x,y coordinate. e.g., (58, 9)
-        <pronunciatio> is an emoji.
+        <pronunciation> is an emoji.
         <description> is a string description of the movement. e.g., 
         writing her next novel (editing her novel) 
         @ double studio:double studio:common room:sofa
@@ -196,7 +197,7 @@ class Persona:
     OUTPUT: 
       execution: A triple set that contains the following components: 
         <next_tile> is a x,y coordinate. e.g., (58, 9)
-        <pronunciatio> is an emoji.
+        <pronunciation> is an emoji.
         <description> is a string description of the movement. e.g., 
         writing her next novel (editing her novel) 
         @ double studio:double studio:common room:sofa
@@ -224,7 +225,7 @@ class Persona:
 
     # <execution> is a triple set that contains the following components: 
     # <next_tile> is a x,y coordinate. e.g., (58, 9)
-    # <pronunciatio> is an emoji. e.g., "\ud83d\udca4"
+    # <pronunciation> is an emoji. e.g., "\ud83d\udca4"
     # <description> is a string description of the movement. e.g., 
     #   writing her next novel (editing her novel) 
     #   @ double studio:double studio:common room:sofa
@@ -233,40 +234,3 @@ class Persona:
 
   def open_convo_session(self, convo_mode): 
     open_convo_session(self, convo_mode)
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -195,7 +195,7 @@ def ChatGPT_safe_generate_response_OLD(prompt,
 # ###################[SECTION 2: ORIGINAL GPT-3 STRUCTURE] ###################
 # ============================================================================
 
-def GPT_request(prompt, gpt_parameter): 
+def generate_response(prompt, gpt_parameter): 
   """
   Given a prompt and a dictionary of GPT parameters, make a request to OpenAI
   server and returns the response. 
@@ -221,7 +221,7 @@ def GPT_request(prompt, gpt_parameter):
                 stop=gpt_parameter["stop"],)
     return response.choices[0].text
   except: 
-    print ("TOKEN LIMIT EXCEEDED")
+    print ("Error returning response")
     return "TOKEN LIMIT EXCEEDED"
 
 
@@ -264,7 +264,7 @@ def safe_generate_response(prompt,
     print (prompt)
 
   for i in range(repeat): 
-    curr_gpt_response = GPT_request(prompt, gpt_parameter)
+    curr_gpt_response = generate_response(prompt, gpt_parameter)
     if func_validate(curr_gpt_response, prompt=prompt): 
       return func_clean_up(curr_gpt_response, prompt=prompt)
     if verbose: 

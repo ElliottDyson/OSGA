@@ -1,5 +1,6 @@
 """
-Author: Joon Sung Park (joonspk@stanford.edu)
+Original Author: Joon Sung Park (joonspk@stanford.edu)
+New Authors/Editors: OSGA Community, OSGA Community Organiser: Elliott Dyson (elliottdysondesigns@gmail.com)
 
 File: reverie.py
 Description: This is the main program for running generative agent simulations
@@ -372,16 +373,16 @@ class ReverieServer:
                        "meta": dict()}
           for persona_name, persona in self.personas.items(): 
             # <next_tile> is a x,y coordinate. e.g., (58, 9)
-            # <pronunciatio> is an emoji. e.g., "\ud83d\udca4"
+            # <pronunciation> is an emoji. e.g., "\ud83d\udca4"
             # <description> is a string description of the movement. e.g., 
             #   writing her next novel (editing her novel) 
             #   @ double studio:double studio:common room:sofa
-            next_tile, pronunciatio, description = persona.move(
+            next_tile, pronunciation, description = persona.move(
               self.maze, self.personas, self.personas_tile[persona_name], 
               self.curr_time)
             movements["persona"][persona_name] = {}
             movements["persona"][persona_name]["movement"] = next_tile
-            movements["persona"][persona_name]["pronunciatio"] = pronunciatio
+            movements["persona"][persona_name]["pronunciation"] = pronunciation
             movements["persona"][persona_name]["description"] = description
             movements["persona"][persona_name]["chat"] = (persona
                                                           .scratch.chat)

@@ -1,5 +1,6 @@
 """
-Author: Joon Sung Park (joonspk@stanford.edu)
+Original Author: Joon Sung Park (joonspk@stanford.edu)
+New Authors/Editors: OSGA Community, OSGA Community Organiser: Elliott Dyson (elliottdysondesigns@gmail.com)
 
 File: perceive.py
 Description: This defines the "Perceive" module for generative agents. 
