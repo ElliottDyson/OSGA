@@ -77,7 +77,7 @@ Name: !<INPUT 0>!
 Age: !<INPUT 1>!
 Backstory: !<INPUT 2>!
 Personality: !<INPUT 3>!
-Location: !<INPUT 4>! is in !<INPUT 5>! that has the following areas: {!<INPUT 6>!}. 
+Location: !<INPUT 4>! is in !<INPUT 5>! that has the following comma separated list of areas: {!<INPUT 6>!}. 
 Currently: !<INPUT 7>!
 Daily plan requirement: !<INPUT 8>!
 

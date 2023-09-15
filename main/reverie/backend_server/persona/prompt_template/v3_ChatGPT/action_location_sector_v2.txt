@@ -17,6 +17,6 @@ This is a classification task -- choose an appropriate area from the area option
 
 Stay in the current area if the activity can be done there. Only go out if the activity needs to take place in another place.
 
-Area Options Available (Class label): {!<INPUT 7>!}
+A comma separated list of Area Options Available (Class label): {!<INPUT 7>!}
 
-Classification Task: !<INPUT 8>! is !<INPUT 10>! as a part of !<INPUT 9>!. Pick one of the choices given in the Area options that !<INPUT 11>! should go to. 
+Classification Task: !<INPUT 8>! is !<INPUT 10>! as a part of !<INPUT 9>!. Pick one of the choices given in the Area options that !<INPUT 11>! should go to. You must include all the words in the Area of choice.
