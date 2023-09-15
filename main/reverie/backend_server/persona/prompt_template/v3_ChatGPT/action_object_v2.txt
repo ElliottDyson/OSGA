@@ -4,5 +4,5 @@ Variables:
 
 <commentblockmarker>###</commentblockmarker>
 Current activity: !<INPUT 0>!
-ONLY objects available: {!<INPUT 1>!}
+A comma separated list of the ONLY objects available: {!<INPUT 1>!}
 Pick ONE most relevant object from the objects available:
