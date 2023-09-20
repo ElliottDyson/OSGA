@@ -1,5 +1,5 @@
-!models/.gitkeep
-models/*
+!models/
+models/stablebeluga-13b.Q5_K_M.gguf
 
 reverie/backend_server/utils.py
 frontend_server/settings/local.py
