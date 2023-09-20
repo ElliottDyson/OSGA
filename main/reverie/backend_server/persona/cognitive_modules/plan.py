@@ -9,7 +9,6 @@ import datetime
 import math
 import random 
 import sys
-import time
 sys.path.append('../../')
 
 from global_methods import *
@@ -35,8 +34,12 @@ def generate_wake_up_hour(persona):
   EXAMPLE OUTPUT: 
     8
   """
-  if debug: print ("GNS FUNCTION: <generate_wake_up_hour>")
-  return int(run_gpt_prompt_wake_up_hour(persona)[0])
+  logging.debug(f"GNS FUNCTION: <generate_wake_up_hour>")
+
+  x = int(run_gpt_prompt_wake_up_hour(persona)[0])
+  logging.debug(f"wake_up_hour: {x}")
+
+  return x
 
 
 def generate_first_daily_plan(persona, wake_up_hour): 
@@ -65,8 +68,12 @@ def generate_first_daily_plan(persona, wake_up_hour):
      'work on painting project from 4:00 pm to 6:00 pm', 
      'have dinner at 6:00 pm', 'watch TV from 7:00 pm to 8:00 pm']
   """
-  if debug: print ("GNS FUNCTION: <generate_first_daily_plan>")
-  return run_gpt_prompt_daily_plan(persona, wake_up_hour)[0]
+  logging.debug(f"GNS FUNCTION: <generate_first_daily_plan>")
+
+  x = run_gpt_prompt_daily_plan(persona, wake_up_hour)[0]
+  logging.debug(f"daily_plan: {x}")
+
+  return x
 
 
 def generate_hourly_schedule(persona, wake_up_hour): 
@@ -88,7 +95,7 @@ def generate_hourly_schedule(persona, wake_up_hour):
     [['sleeping', 360], ['waking up and starting her morning routine', 60], 
      ['eating breakfast', 60],..
   """
-  if debug: print ("GNS FUNCTION: <generate_hourly_schedule>")
+  logging.debug(f"GNS FUNCTION: <generate_hourly_schedule>")
 
   hour_str = ["00:00 AM", "01:00 AM", "02:00 AM", "03:00 AM", "04:00 AM", 
               "05:00 AM", "06:00 AM", "07:00 AM", "08:00 AM", "09:00 AM", 
@@ -101,7 +108,7 @@ def generate_hourly_schedule(persona, wake_up_hour):
     n_m1_activity_set = set(n_m1_activity)
     if len(n_m1_activity_set) < 5: 
       n_m1_activity = []
-      for count, curr_hour_str in enumerate(hour_str): 
+      for count, curr_hour_str in enumerate(hour_str):
         if wake_up_hour > 0: 
           n_m1_activity += ["sleeping"]
           wake_up_hour -= 1
@@ -161,12 +168,16 @@ def generate_task_decomp(persona, task, duration):
      ['starting to work on her painting', 15]] 
 
   """
-  if debug: print ("GNS FUNCTION: <generate_task_decomp>")
-  return run_gpt_prompt_task_decomp(persona, task, duration)[0]
+  logging.debug(f"GNS FUNCTION: <generate_task_decomp>")
+
+  x = run_gpt_prompt_task_decomp(persona, task, duration)[0]
+  logging.debug(f"task_decomp: {x}")
+
+  return x
 
 
 def generate_action_sector(act_desp, persona, maze): 
-  """TODO 
+  """
   Given the persona and the task description, choose the action_sector. 
 
   Persona state: identity stable set, n-1 day schedule, daily plan
@@ -179,12 +190,16 @@ def generate_action_sector(act_desp, persona, maze):
   EXAMPLE OUTPUT: 
     "bedroom 2"
   """
-  if debug: print ("GNS FUNCTION: <generate_action_sector>")
-  return run_gpt_prompt_action_sector(act_desp, persona, maze)[0]
+  logging.debug(f"GNS FUNCTION: <generate_action_sector>")
+
+  x = run_gpt_prompt_action_sector(act_desp, persona, maze)[0]
+  logging.debug(f"action_sector: {x}")
+
+  return x
 
 
 def generate_action_arena(act_desp, persona, maze, act_world, act_sector): 
-  """TODO 
+  """
   Given the persona and the task description, choose the action_arena. 
 
   Persona state: identity stable set, n-1 day schedule, daily plan
@@ -197,12 +212,16 @@ def generate_action_arena(act_desp, persona, maze, act_world, act_sector):
   EXAMPLE OUTPUT: 
     "bedroom 2"
   """
-  if debug: print ("GNS FUNCTION: <generate_action_arena>")
-  return run_gpt_prompt_action_arena(act_desp, persona, maze, act_world, act_sector)[0]
+  logging.debug(f"GNS FUNCTION: <generate_action_arena>")
+
+  x = run_gpt_prompt_action_arena(act_desp, persona, maze, act_world, act_sector)[0]
+  logging.debug(f"action_arena: {x}")
+
+  return x
 
 
 def generate_action_game_object(act_desp, act_address, persona, maze):
-  """TODO
+  """
   Given the action description and the act address (the address where
   we expect the action to task place), choose one of the game objects. 
 
@@ -218,14 +237,19 @@ def generate_action_game_object(act_desp, act_address, persona, maze):
   EXAMPLE OUTPUT: 
     "bed"
   """
-  if debug: print ("GNS FUNCTION: <generate_action_game_object>")
+  logging.debug(f"GNS FUNCTION: <generate_action_game_object>")
+
   if not persona.s_mem.get_str_accessible_arena_game_objects(act_address): 
     return "<random>"
-  return run_gpt_prompt_action_game_object(act_desp, persona, maze, act_address)[0]
+  
+  x = run_gpt_prompt_action_game_object(act_desp, persona, maze, act_address)[0]
+  logging.debug(f"action_game_object: {x}")
+
+  return x
 
 
 def generate_action_pronunciation(act_desp, persona): 
-  """TODO 
+  """
   Given an action description, creates an emoji string description via a few
   shot prompt. 
 
@@ -239,17 +263,16 @@ def generate_action_pronunciation(act_desp, persona):
   EXAMPLE OUTPUT: 
     "🧈🍞"
   """
-  if debug: print ("GNS FUNCTION: <generate_action_pronunciation>")
-  try: 
-    x = run_gpt_prompt_pronunciation(act_desp, persona)[0]
-  except: 
-    x = "🙂"
+  logging.debug(f"GNS FUNCTION: <generate_action_pronunciation>")
+  
+  x = run_gpt_prompt_pronunciation(act_desp, persona)[0]
+  logging.debug(f"action_pronunciation: {x}")
+
   return x
 
 
 def generate_action_event_triple(act_desp, persona): 
-  """TODO 
-
+  """
   INPUT: 
     act_desp: the description of the action (e.g., "sleeping")
     persona: The Persona class instance
@@ -258,18 +281,30 @@ def generate_action_event_triple(act_desp, persona):
   EXAMPLE OUTPUT: 
     "🧈🍞"
   """
-  if debug: print ("GNS FUNCTION: <generate_action_event_triple>")
-  return run_gpt_prompt_event_triple(act_desp, persona)[0]
+  logging.debug("GNS FUNCTION: <generate_action_event_triple>")
+
+  x = run_gpt_prompt_event_triple(act_desp, persona)[0]
+  logging.debug(f"action_event_triple: {x}")
+
+  return x
 
 
 def generate_act_obj_desc(act_game_object, act_desp, persona): 
-  if debug: print ("GNS FUNCTION: <generate_act_obj_desc>")
-  return run_gpt_prompt_act_obj_desc(act_game_object, act_desp, persona)[0]
+  logging.debug("GNS FUNCTION: <generate_act_obj_desc>")
+
+  x = run_gpt_prompt_act_obj_desc(act_game_object, act_desp, persona)[0]
+  logging.debug(f"act_obj_desc: {x}")
+
+  return x
 
 
 def generate_act_obj_event_triple(act_game_object, act_obj_desc, persona): 
-  if debug: print ("GNS FUNCTION: <generate_act_obj_event_triple>")
-  return run_gpt_prompt_act_obj_event_triple(act_game_object, act_obj_desc, persona)[0]
+  logging.debug("GNS FUNCTION: <generate_act_obj_event_triple>")
+
+  x = run_gpt_prompt_act_obj_event_triple(act_game_object, act_obj_desc, persona)[0]
+  logging.debug(f"act_obj_event_triple: {x}")
+
+  return x
 
 
 def generate_convo(maze, init_persona, target_persona): 
@@ -287,18 +322,25 @@ def generate_convo(maze, init_persona, target_persona):
 
   convo_length = math.ceil(int(len(all_utt)/8) / 30)
 
-  if debug: print ("GNS FUNCTION: <generate_convo>")
+  logging.debug(f"GNS FUNCTION: <generate_convo>")
+  logging.debug(f"convo: {convo}, {convo_length}")
+  
   return convo, convo_length
 
 
-def generate_convo_summary(persona, convo): 
+def generate_convo_summary(persona, convo):
+  logging.debug("GNS FUNCTION: <generate_convo_summary>")
+
   convo_summary = run_gpt_prompt_summarize_conversation(persona, convo)[0]
+  logging.debug(f"convo_summary: {convo_summary}")
+
   return convo_summary
 
 
 def generate_decide_to_talk(init_persona, target_persona, retrieved): 
-  x =run_gpt_prompt_decide_to_talk(init_persona, target_persona, retrieved)[0]
-  if debug: print ("GNS FUNCTION: <generate_decide_to_talk>")
+  logging.debug("GNS FUNCTION: <generate_decide_to_talk>")
+
+  x = run_gpt_prompt_decide_to_talk(init_persona, target_persona, retrieved)[0]
 
   if x == "yes": 
     return True
@@ -307,8 +349,12 @@ def generate_decide_to_talk(init_persona, target_persona, retrieved):
 
 
 def generate_decide_to_react(init_persona, target_persona, retrieved): 
-  if debug: print ("GNS FUNCTION: <generate_decide_to_react>")
-  return run_gpt_prompt_decide_to_react(init_persona, target_persona, retrieved)[0]
+  logging.debug("GNS FUNCTION: <generate_decide_to_react>")
+
+  x = run_gpt_prompt_decide_to_react(init_persona, target_persona, retrieved)[0]
+  logging.debug(f"decide_to_react: {x}")
+
+  return x
 
 
 def generate_new_decomp_schedule(persona, inserted_act, inserted_act_dur,  start_hour, end_hour): 
@@ -351,7 +397,7 @@ def generate_new_decomp_schedule(persona, inserted_act, inserted_act_dur,  start
   count = 0 # enumerate count
   truncated_fin = False 
 
-  print ("DEBUG::: ", persona.scratch.name)
+  logging.debug(f"DEBUG::: {p.scratch.f_daily_schedule}")
   for act, dur in p.scratch.f_daily_schedule: 
     if (dur_sum >= start_hour * 60) and (dur_sum < end_hour * 60): 
       main_act_dur += [[act, dur]]
@@ -364,7 +410,7 @@ def generate_new_decomp_schedule(persona, inserted_act, inserted_act_dur,  start
                                dur_sum - today_min_pass]] 
         truncated_act_dur[-1][-1] -= (dur_sum - today_min_pass) ######## DEC 7 DEBUG;.. is the +1 the right thing to do??? 
         # truncated_act_dur[-1][-1] -= (dur_sum - today_min_pass + 1) ######## DEC 7 DEBUG;.. is the +1 the right thing to do??? 
-        print ("DEBUG::: ", truncated_act_dur)
+        logging.debug(f"DEBUG::: {truncated_act_dur}")
 
         # truncated_act_dur[-1][-1] -= (dur_sum - today_min_pass) ######## DEC 7 DEBUG;.. is the +1 the right thing to do??? 
         truncated_fin = True
@@ -422,13 +468,13 @@ def revise_identity(persona):
   plan_prompt += f"If there is any scheduling information, be as specific as possible (include date, time, and location if stated in the statement)\n\n"
   plan_prompt += f"Write the response from {p_name}'s perspective."
   plan_note = ChatGPT_single_request(plan_prompt)
-  # print (plan_note)
+  # logging.debug(f"plan_note: {plan_note}")
 
   thought_prompt = statements + "\n"
   thought_prompt += f"Given the statements above, how might we summarize {p_name}'s feelings about their days up to now?\n\n"
   thought_prompt += f"Write the response from {p_name}'s perspective."
   thought_note = ChatGPT_single_request(thought_prompt)
-  # print (thought_note)
+  # logging.debug(f"thought_note: {thought_note}")
 
   currently_prompt = f"{p_name}'s status from {(persona.scratch.curr_time - datetime.timedelta(days=1)).strftime('%A %B %d')}:\n"
   currently_prompt += f"{persona.scratch.currently}\n\n"
@@ -437,11 +483,9 @@ def revise_identity(persona):
   currently_prompt += f"It is now {persona.scratch.curr_time.strftime('%A %B %d')}. Given the above, write {p_name}'s status for {persona.scratch.curr_time.strftime('%A %B %d')} that reflects {p_name}'s thoughts at the end of {(persona.scratch.curr_time - datetime.timedelta(days=1)).strftime('%A %B %d')}. Write this in third-person talking about {p_name}."
   currently_prompt += f"If there is any scheduling information, be as specific as possible (include date, time, and location if stated in the statement).\n\n"
   currently_prompt += "Follow this format below:\nStatus: <new status>"
-  # print ("DEBUG ;adjhfno;asdjao;asdfsidfjo;af", p_name)
-  # print (currently_prompt)
+  # logging.debug(f"currently_prompt: {currently_prompt}, {p_name}")
   new_currently = ChatGPT_single_request(currently_prompt)
-  # print (new_currently)
-  # print (new_currently[10:])
+  # logging.debug(f"new_currently: {new_currently}")
 
   persona.scratch.currently = new_currently
 
@@ -452,7 +496,7 @@ def revise_identity(persona):
 
   new_daily_req = ChatGPT_single_request(daily_req_prompt)
   new_daily_req = new_daily_req.replace('\n', ' ')
-  print ("WE ARE HERE!!!", new_daily_req)
+  # logging.debug(f"new_daily_req: {new_daily_req}")
   persona.scratch.daily_plan_req = new_daily_req
 
 
@@ -593,18 +637,13 @@ def _determine_action(persona, maze):
   # Generate an <Action> instance from the action description and duration. By
   # this point, we assume that all the relevant actions are decomposed and 
   # ready in f_daily_schedule. 
-  print ("DEBUG LJSDLFSKJF")
-  for i in persona.scratch.f_daily_schedule: print (i)
-  print (curr_index)
-  print (len(persona.scratch.f_daily_schedule))
-  print (persona.scratch.name)
-  print ("------")
+  logging.debug(f"DEBUG::: {persona.scratch.f_daily_schedule}, {curr_index}, {len(persona.scratch.f_daily_schedule)}, {persona.scratch.name}")
 
   # 1440
   x_emergency = 0
   for i in persona.scratch.f_daily_schedule: 
     x_emergency += i[1]
-  # print ("x_emergency", x_emergency)
+  # logging.debug(f"x_emergency= {x_emergency}, {persona.scratch.name}")
 
   if 1440 - x_emergency > 0: 
     print ("x_emergency__AAA", x_emergency)
