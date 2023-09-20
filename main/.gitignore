@@ -1,4 +1,4 @@
-!models/
+!models/.gitkeep
 models/*
 
 reverie/backend_server/utils.py
