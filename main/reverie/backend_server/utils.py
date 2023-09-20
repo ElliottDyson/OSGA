@@ -1,8 +1,11 @@
-openai_api_key = "something" #keep as is, the only reason it isn't "", is because we need to return "some" string.
-"""ngrok for public IP addresses of externally hosted notebook instances - localhost:8000 for locally hosted instances"""
-base_api_url = "http://c5b0-34-171-95-246.ngrok-free.app/v1"   #   "https://YOUR_NEW_API_ENDPOINT/v1" must end in /v1 due to the nature of llama-cpp-python
+openai_api_key = "something" # Can use anything within the string if not actually using OpenAI_API (however there must be "some" string)
 
-model_name = "model"
+"""use ngrok for public IP addresses of externally hosted notebook instances (uncomment and comment out the line for local llama)"""
+# base_api_url = "http://c5b0-34-171-95-246.ngrok-free.app/v1"   #   "https://YOUR_NEW_API_ENDPOINT/v1" must end in /v1 due to the nature of llama-cpp-python
+
+"""use localhost for local llama (uncomment and comment out the line for ngrok)"""
+base_api_url = "http://localhost:8080/v1" # Use for local llama
+
 
 maze_assets_loc = "../../environment/frontend_server/static_dirs/assets"
 env_matrix = f"{maze_assets_loc}/the_ville/matrix"

@@ -12,6 +12,11 @@ set GPU_LAYERS=0
 :: Allow the user to change the default value
 set /P GPU_LAYERS=Enter the number of model layers to send to the GPU (default is 0 for cases of CPU only implementations):
 
+:: Default value for context length
+set CTX_LENGTH=4096
+:: Allow the user to change the default value
+set /P CTX_LENGTH=Enter the model's context length (default is 4096):
+
 :: List .gguf files in the models/ directory and allow the user to select one
 echo Available models:
 setlocal enabledelayedexpansion
@@ -23,7 +28,7 @@ for %%f in (models/*.gguf) do (
 
 if %COUNT%==0 (
     echo No .gguf files found in the models/ directory. 
-	echo Please download a .gguf llama model to the 'models' folder if you wish to run the model locally
+    echo Please download a .gguf llama model to the 'models' folder if you wish to run the model locally
     pause
     exit
 )
@@ -35,12 +40,15 @@ set COUNT=0
 for %%f in (models/*.gguf) do (
     set /a COUNT+=1
     if !COUNT!==%MODEL_CHOICE% (
-        set MODEL_PATH=%%f
+        set MODEL_PATH=models/%%~nxf
     )
 )
 
-:: Run the llama_cpp.server with the selected model
-start cmd.exe /K "title Llama CPP Server (Local-LLAMA) && python3 -m llama_cpp.server --model %MODEL_PATH% --n_gpu_layers %GPU_LAYERS%"
+:: Run the llama_cpp.server with the selected model, GPU layers, and context length
+start cmd.exe /K "title Llama CPP Server (Local-LLAMA) && py -m llama_cpp.server --model %MODEL_PATH% --n_gpu_layers %GPU_LAYERS% --n_ctx %CTX_LENGTH% --port 8080"
+
+:: Wait 20s for the model to load
+timeout /T 20 /NOBREAK
 
 :SKIP_SERVER
 
