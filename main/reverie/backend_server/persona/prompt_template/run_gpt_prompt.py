@@ -9,7 +9,6 @@ interface with the safe_generate_response function.
 import re
 import datetime
 import sys
-import ast
 
 #Logging Setup
 import logging
@@ -350,7 +349,6 @@ def run_gpt_prompt_task_decomp(persona,
     prompt_input = []
     prompt_input += [persona.scratch.get_str_iss()]
     prompt_input += [summ_str]
-    # prompt_input += [persona.scratch.get_str_curr_date_str()]
     prompt_input += [persona.scratch.get_str_firstname()]
     prompt_input += [persona.scratch.get_str_firstname()]
     prompt_input += [task]
@@ -360,9 +358,6 @@ def run_gpt_prompt_task_decomp(persona,
     return prompt_input
 
   def __func_clean_up(gpt_response, prompt=""):
-    print ("TOODOOOOOO")
-    print (gpt_response)
-    print ("-==- -==- -==- ")
 
     # TODO SOMETHING HERE sometimes fails... See screenshot
     temp = [i.strip() for i in gpt_response.split("\n")]
