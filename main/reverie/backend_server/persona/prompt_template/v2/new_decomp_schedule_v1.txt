@@ -16,7 +16,7 @@ Variables:
 
 
 <commentblockmarker>###</commentblockmarker>
-Here was !<INPUT 0>!'s originally planned schedule from !<INPUT 1>! to !<INPUT 2>!. 
+Make sure to fill up the whole time with subtasks. Here was !<INPUT 0>!'s originally planned schedule from !<INPUT 1>! to !<INPUT 2>!. 
 !<INPUT 3>!
 
 But !<INPUT 4>! unexpectedly ended up !<INPUT 5>! for !<INPUT 6>! minutes. Revise !<INPUT 7>!'s schedule from !<INPUT 8>! to !<INPUT 9>! accordingly (it has to end by !<INPUT 10>!). 

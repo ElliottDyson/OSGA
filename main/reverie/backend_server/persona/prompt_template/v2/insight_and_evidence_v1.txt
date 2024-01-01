@@ -5,8 +5,32 @@ Variables:
 !<INPUT 1>! -- target persona name or "the conversation"
 
 <commentblockmarker>###</commentblockmarker>
-Input:
+Objective: To analyze a set of statements, synthesize key insights, and format the output for easy parsing, with clear separation between the insight text and the associated node IDs.
+
+Response Format:
+
+Each insight will be presented in a structured format: Insight: [Insight Text] | IDs: [List of IDs].
+The Insight: tag precedes the synthesized insight.
+The IDs: tag follows the insight, listing the source statement IDs in brackets.
+
+Response Parameters:
+
+Structured Clarity: Responses should be clear, with a distinct separation between the insight and its source IDs.
+Referencing and Synthesis: Insights must reference the source IDs and synthesize information from these statements.
+Relevance and Depth: Ensure insights are relevant, avoiding trivial observations, and seek to uncover deeper connections or themes.
+Tone of Voice: Analytical and precise.
+
+Additional Information for GPT:
+
+The input statements will have unique IDs for referencing.
+The focus is on creating insights useful for decision-making or revealing underlying themes.
+Group related statements to form comprehensive insights where applicable.
+
+Task:
+Given the following statements with their IDs:
+
 !<INPUT 0>!
 
-What !<INPUT 1>! high-level insights can you infer from the above statements? (example format: insight (because of 1, 5, 3))
-1.
+Generate !<INPUT 1>! insights with IDs of the statements used.
+
+Output:

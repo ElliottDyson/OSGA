@@ -23,17 +23,20 @@ Daily plan requirement: Kelly is planning to teach during the morning and work f
 
 Today is Saturday May 10. From 08:00am ~09:00am, Kelly is planning on having breakfast, from 09:00am ~ 12:00pm, Kelly is planning on working on the next day's kindergarten lesson plan, and from 12:00 ~ 13pm, Kelly is planning on taking a break. 
 In 5 min increments, list the subtasks Kelly does when Kelly is working on the next day's kindergarten lesson plan from 09:00am ~ 12:00pm (total duration in minutes: 180):
-1) Kelly is reviewing the kindergarten curriculum standards. (duration in minutes: 15, minutes left: 165)
-2) Kelly is brainstorming ideas for the lesson. (duration in minutes: 30, minutes left: 135)
-3) Kelly is creating the lesson plan. (duration in minutes: 30, minutes left: 105)
-4) Kelly is creating materials for the lesson. (duration in minutes: 30, minutes left: 75)
-5) Kelly is taking a break. (duration in minutes: 15, minutes left: 60)
-6) Kelly is reviewing the lesson plan. (duration in minutes: 30, minutes left: 30)
-7) Kelly is making final changes to the lesson plan. (duration in minutes: 15, minutes left: 15)
-8) Kelly is printing the lesson plan. (duration in minutes: 10, minutes left: 5)
-9) Kelly is putting the lesson plan in her bag. (duration in minutes: 5, minutes left: 0)
+1) reviewing the kindergarten curriculum standards. (duration in minutes: 15, minutes left: 165)
+2) brainstorming ideas for the lesson. (duration in minutes: 30, minutes left: 135)
+3) creating the lesson plan. (duration in minutes: 30, minutes left: 105)
+4) creating materials for the lesson. (duration in minutes: 30, minutes left: 75)
+5) taking a break. (duration in minutes: 15, minutes left: 60)
+6) reviewing the lesson plan. (duration in minutes: 30, minutes left: 30)
+7) making final changes to the lesson plan. (duration in minutes: 15, minutes left: 15)
+8) printing the lesson plan. (duration in minutes: 10, minutes left: 5)
+9) putting the lesson plan in her bag. (duration in minutes: 5, minutes left: 0)
 ---
 !<INPUT 0>!
 !<INPUT 1>!
+
+Make sure to only provide subtasks which can be done or are required for the tasks mentioned above. Make sure to not go over time.
+
 In 5 min increments, list the subtasks !<INPUT 2>! does when !<INPUT 3>! is !<INPUT 4>! from !<INPUT 5>! (total duration in minutes !<INPUT 6>!): 
-1) !<INPUT 7>! is
+

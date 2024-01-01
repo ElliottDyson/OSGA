@@ -30,7 +30,7 @@ import shutil
 import traceback
 
 from selenium import webdriver
-
+from tqdm import tqdm
 from global_methods import *
 from utils import *
 from maze import *
@@ -136,7 +136,7 @@ class ReverieServer:
     # REVERIE SETTINGS PARAMETERS:  
     # <server_sleep> denotes the amount of time that our while loop rests each
     # cycle; this is to not kill our machine. 
-    self.server_sleep = 0.1
+    self.server_sleep = 0.000
 
     # SIGNALING THE FRONTEND SERVER: 
     # curr_sim_code.json contains the current simulation code, and
@@ -302,7 +302,8 @@ class ReverieServer:
     # So we need to keep track of which event we added. 
     # <game_obj_cleanup> is used for that. 
     game_obj_cleanup = dict()
-
+    program_starts = time.time()
+    pbar = tqdm(total = int_counter)
     # The main while loop of Reverie. 
     while (True): 
       # Done with this iteration if <int_counter> reaches 0. 
@@ -411,9 +412,20 @@ class ReverieServer:
           self.curr_time += datetime.timedelta(seconds=self.sec_per_step)
 
           int_counter -= 1
+          pbar.update(1)
+
+          if int_counter % 100 == 0:
+            self.save()
+            
+          now = time.time()
+          print("It has been {0} seconds since the loop started".format(now - program_starts))
+
           
       # Sleep so we don't burn our machines. 
       time.sleep(self.server_sleep)
+
+    pbar.close()
+
 
 
   def open_server(self): 

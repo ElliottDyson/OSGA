@@ -38,9 +38,12 @@ def generate_focal_points(persona, n=3):
 def generate_insights_and_evidence(persona, nodes, n=5): 
   if debug: print ("GNS FUNCTION: <generate_insights_and_evidence>")
 
+  unique_embeddings = set()
   statements = ""
   for count, node in enumerate(nodes): 
-    statements += f'{str(count)}. {node.embedding_key}\n'
+      if node.embedding_key not in unique_embeddings:
+          unique_embeddings.add(node.embedding_key)
+          statements += f'{str(count)}. {node.embedding_key}\n'
 
   ret = run_gpt_prompt_insight_and_guidance(persona, statements, n)[0]
 

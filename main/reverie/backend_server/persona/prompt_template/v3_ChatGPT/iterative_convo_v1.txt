@@ -38,6 +38,7 @@ Current Context:
 
 ---
 Task: Given the above, what should !<INPUT 9>! say to !<INPUT 10>! next in the conversation? And did it end the conversation?
+Do not repeat yourself
 
 Output format: Output a json of the following format: 
 {
