@@ -12,43 +12,14 @@ sys.path.append('../../')
 
 import json
 import datetime
-
+# from .neo4j import conn
 from global_methods import *
-
-
-class ConceptNode: 
-  def __init__(self,
-               node_id, node_count, type_count, node_type, depth,
-               created, expiration, 
-               s, p, o, 
-               description, embedding_key, poignancy, keywords, filling): 
-    self.node_id = node_id
-    self.node_count = node_count
-    self.type_count = type_count
-    self.type = node_type # thought / event / chat
-    self.depth = depth
-
-    self.created = created
-    self.expiration = expiration
-    self.last_accessed = self.created
-
-    self.subject = s
-    self.predicate = p
-    self.object = o
-
-    self.description = description
-    self.embedding_key = embedding_key
-    self.poignancy = poignancy
-    self.keywords = keywords
-    self.filling = filling
-
-
-  def spo_summary(self): 
-    return (self.subject, self.predicate, self.object)
+from .concept_node import ConceptNode
 
 
 class AssociativeMemory: 
-  def __init__(self, f_saved): 
+  def __init__(self, f_saved, persona_id): 
+    self.persona_id = persona_id
     self.id_to_node = dict()
 
     self.seq_event = []
@@ -167,7 +138,7 @@ class AssociativeMemory:
                      +  description.split("(")[-1][:-1])
 
     # Creating the <ConceptNode> object.
-    node = ConceptNode(node_id, node_count, type_count, node_type, depth,
+    node = ConceptNode(self.persona_id, node_id, node_count, type_count, node_type, depth,
                        created, expiration, 
                        s, p, o, 
                        description, embedding_pair[0], 
@@ -182,6 +153,7 @@ class AssociativeMemory:
       else: 
         self.kw_to_event[kw] = [node]
     self.id_to_node[node_id] = node 
+    # conn.save_concept_node(node)
 
     # Adding in the kw_strength
     if f"{p} {o}" != "is idle":  
@@ -212,7 +184,7 @@ class AssociativeMemory:
       pass
 
     # Creating the <ConceptNode> object.
-    node = ConceptNode(node_id, node_count, type_count, node_type, depth,
+    node = ConceptNode(self.persona_id, node_id, node_count, type_count, node_type, depth,
                        created, expiration, 
                        s, p, o, 
                        description, embedding_pair[0], poignancy, keywords, filling)
@@ -226,6 +198,7 @@ class AssociativeMemory:
       else: 
         self.kw_to_thought[kw] = [node]
     self.id_to_node[node_id] = node 
+    # conn.save_concept_node(node)
 
     # Adding in the kw_strength
     if f"{p} {o}" != "is idle":  
@@ -251,7 +224,7 @@ class AssociativeMemory:
     depth = 0
 
     # Creating the <ConceptNode> object.
-    node = ConceptNode(node_id, node_count, type_count, node_type, depth,
+    node = ConceptNode(self.persona_id, node_id, node_count, type_count, node_type, depth,
                        created, expiration, 
                        s, p, o, 
                        description, embedding_pair[0], poignancy, keywords, filling)
@@ -265,6 +238,7 @@ class AssociativeMemory:
       else: 
         self.kw_to_chat[kw] = [node]
     self.id_to_node[node_id] = node 
+    # conn.save_concept_node(node)
 
     self.embeddings[embedding_pair[0]] = embedding_pair[1]
         

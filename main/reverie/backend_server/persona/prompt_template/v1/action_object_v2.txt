@@ -29,4 +29,6 @@ Pick ONE most relevant object from the objects available: phone
 ---
 Current activity: !<INPUT 0>!
 Objects available: {!<INPUT 1>!}
+
+Expected Response Format: Just the object name in quotes, like 'object'.
 Pick ONE most relevant object from the objects available:

@@ -114,6 +114,8 @@ def perceive(persona, maze):
       p = "is"
       o = "idle"
       desc = "idle"
+    if not o:
+      o = "idle"
     desc = f"{s.split(':')[-1]} is {desc}"
     p_event = (s, p, o)
 

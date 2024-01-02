@@ -17,7 +17,8 @@ pip-selfcheck.json
 __pycache__/
 *.py[cod]
 *$py.class
-
+**/__pycache__/
+*output.txt
 # C extensions
 *.so
 

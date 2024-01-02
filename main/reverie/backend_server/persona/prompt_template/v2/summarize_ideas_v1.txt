@@ -13,4 +13,3 @@ An interviewer said to !<INPUT 1>!:
 "!<INPUT 2>!"
 
 Summarize the Statements that are most relevant to the interviewer's line:
-"
