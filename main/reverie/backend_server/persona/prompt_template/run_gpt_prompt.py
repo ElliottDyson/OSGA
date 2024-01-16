@@ -434,10 +434,10 @@ def run_gpt_prompt_task_decomp(persona,
     return adjust_durations(formatted_data, total_expected_min)
 
   def get_fail_safe(): 
-    fs = ["asleep", 0]
+    fs = [["asleep", 0]]
     return fs
 
-  gpt_param = {"engine": "text-davinci-003", "max_tokens": 1000, 
+  gpt_param = {"engine": "text-davinci-003", "max_tokens": 1500, 
              "temperature": 0.2, "top_p": 0.1, "stream": False,
              "frequency_penalty": 0, "presence_penalty": 0, "stop": None}
   prompt_template = "persona/prompt_template/v2/task_decomp_v3.txt"
@@ -479,28 +479,6 @@ def run_gpt_prompt_task_decomp(persona,
   # print (prompt_input)
   # print (prompt)
   print (output)
-
-  fin_output = output
-  # time_sum = 0
-  # for item in output:
-  #   if len(item) == 2:
-  #       i_task, i_duration = item
-  #       time_sum += i_duration
-  #       # HM?????????
-  #       # if time_sum < duration: 
-  #       if time_sum <= duration: 
-  #         fin_output += [[i_task, i_duration]]
-  #   else:
-  #       logging.error(f"Expected a tuple of 2 elements, got {item}")
-  #       break
-  ftime_sum = 0
-  for fi_task, fi_duration in fin_output: 
-    ftime_sum += fi_duration
-  
-  # print ("for debugging... line 365", fin_output)
-  if fin_output:  # Check if fin_output is not empty
-    fin_output[-1][1] += (duration - ftime_sum)
-  output = fin_output 
 
   task_decomp = output
   ret = []
@@ -1348,7 +1326,7 @@ def run_gpt_prompt_decide_to_react(persona, target_persona, retrieved,test_input
     fs = "3"
     return fs
 
-  gpt_param = {"engine": "gpt-3.5-turbo-1106", "max_tokens": 20, 
+  gpt_param = {"engine": "gpt-3.5-turbo-1106", "max_tokens": 100, 
                "temperature": 0.2, "top_p": 0.1, "stream": False,
                "frequency_penalty": 0, "presence_penalty": 0, "stop": None}
   prompt_template = "persona/prompt_template/v2/decide_to_react_v1.txt"
@@ -1960,30 +1938,28 @@ def run_gpt_prompt_insight_and_guidance(persona, statements, n, test_input=None,
     Parses the provided text to extract insights and their corresponding IDs.
 
     Args:
-    input_text (str): A string containing insights and IDs in the specified format.
+    gpt_response (str): A string containing insights and IDs in the specified format.
 
     Returns:
     list of tuples: A list where each tuple contains an insight and a list of its corresponding IDs.
     """
     insights = dict()
 
-    # Adjusted regex patterns for insight text
-    insight_regex = r'Insight: ([A-Za-z0-9 \'.,]+)'
-    # More generic regex pattern for IDs
-    id_regex = r'\b\d+(?:,\d+)*\b'
+    # Regex pattern for extracting the insight text.
+    insight_regex = r'Insight: (.*?)\|'
+    # Regex pattern for extracting the IDs.
+    id_regex = r'IDs: \[([0-9, ]+)\]'
 
     segments = re.split(r'\n\n', gpt_response)
     segments = [s for s in segments if s.strip()]  # Remove empty segments
 
     for segment in segments:
         insight_match = re.search(insight_regex, segment)
-        id_matches = re.findall(id_regex, segment)
-
-        print(id_matches)
+        id_matches = re.search(id_regex, segment)
 
         if insight_match and id_matches:
             insight = insight_match.group(1).strip()
-            ids = [int(id.strip()) for id in id_matches]
+            ids = [int(id.strip()) for id in id_matches.group(1).split(',')]
             insights[insight] = ids
 
     return insights

@@ -414,7 +414,7 @@ class ReverieServer:
           int_counter -= 1
           pbar.update(1)
 
-          if int_counter % 100 == 0:
+          if int_counter % 1000 == 0:
             self.save()
             
           now = time.time()
@@ -589,6 +589,14 @@ class ReverieServer:
           # Ex: call -- analysis Isabella Rodriguez
           persona_name = sim_command[len("call -- analysis"):].strip() 
           self.personas[persona_name].open_convo_session("analysis")
+
+        elif ("call -- whisper" 
+              in sim_command.lower()): 
+          # Starts a stateless chat session with the agent. It does not save 
+          # anything to the agent's memory. 
+          # Ex: call -- whisper Isabella Rodriguez
+          persona_name = sim_command[len("call -- analysis"):].strip() 
+          self.personas[persona_name].open_convo_session("whisper")
 
         elif ("call -- load history" 
               in sim_command.lower()): 
