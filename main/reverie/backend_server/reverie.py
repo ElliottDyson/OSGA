@@ -35,6 +35,7 @@ from global_methods import *
 from utils import *
 from maze import *
 from persona.persona import *
+import multiprocessing
 
 ##############################################################################
 #                                  REVERIE                                   #
@@ -276,6 +277,13 @@ class ReverieServer:
 
       time.sleep(self.server_sleep * 10)
 
+  def process_persona(self, persona_name):
+    # this function will process each persona's movement
+    persona = self.personas[persona_name]
+    curr_tile = self.personas_tile[persona_name]
+    # ... logic for processing persona's movement ...
+    next_tile, pronunciation, description = persona.move(self.maze, self.personas, curr_tile, self.curr_time)
+    return persona_name, next_tile, pronunciation, description
 
   def start_server(self, int_counter): 
     """
@@ -372,21 +380,42 @@ class ReverieServer:
           # This is where the core brains of the personas are invoked. 
           movements = {"persona": dict(), 
                        "meta": dict()}
-          for persona_name, persona in self.personas.items(): 
-            # <next_tile> is a x,y coordinate. e.g., (58, 9)
-            # <pronunciation> is an emoji. e.g., "\ud83d\udca4"
-            # <description> is a string description of the movement. e.g., 
-            #   writing her next novel (editing her novel) 
-            #   @ double studio:double studio:common room:sofa
-            next_tile, pronunciation, description = persona.move(
-              self.maze, self.personas, self.personas_tile[persona_name], 
-              self.curr_time)
-            movements["persona"][persona_name] = {}
-            movements["persona"][persona_name]["movement"] = next_tile
-            movements["persona"][persona_name]["pronunciation"] = pronunciation
-            movements["persona"][persona_name]["description"] = description
-            movements["persona"][persona_name]["chat"] = (persona
-                                                          .scratch.chat)
+          # start_time_multiprocessing = time.time()
+          # for persona_name, persona in self.personas.items(): 
+          #   # <next_tile> is a x,y coordinate. e.g., (58, 9)
+          #   # <pronunciation> is an emoji. e.g., "\ud83d\udca4"
+          #   # <description> is a string description of the movement. e.g., 
+          #   #   writing her next novel (editing her novel) 
+          #   #   @ double studio:double studio:common room:sofa
+          #   next_tile, pronunciation, description = persona.move(
+          #     self.maze, self.personas, self.personas_tile[persona_name], 
+          #     self.curr_time)
+          #   movements["persona"][persona_name] = {}
+          #   movements["persona"][persona_name]["movement"] = next_tile
+          #   movements["persona"][persona_name]["pronunciation"] = pronunciation
+          #   movements["persona"][persona_name]["description"] = description
+          #   movements["persona"][persona_name]["chat"] = (persona
+          #                                                 .scratch.chat)
+          # end_time_multiprocessing = time.time()
+
+          args_list = [(persona_name,) for persona_name in self.personas.keys()]
+          
+          start_time_multiprocessing = time.time()
+          with multiprocessing.Pool() as pool:
+              results = pool.starmap(self.process_persona, args_list)
+          end_time_multiprocessing = time.time()
+
+          for persona_name, next_tile, pronunciation, description in results:
+              movements["persona"][persona_name] = {
+                  "movement": next_tile,
+                  "pronunciation": pronunciation,
+                  "description": description,
+                  "chat": self.personas[persona_name].scratch.chat
+              }
+
+          # Print the time taken for multiprocessing
+          print(f"Time for multiprocessing: {end_time_multiprocessing - start_time_multiprocessing} seconds")
+
 
           # Include the meta information about the current stage in the 
           # movements dictionary. 
