@@ -15,7 +15,7 @@ import logging
 import time
 from utils import *
 # this saves the output to a file. comment out if you don't want to save to a file
-from output import *
+from .output import *
 
 debug_level = debug_run_gpt_prompt # Set in utils.py
 logging.basicConfig(level=debug_level)

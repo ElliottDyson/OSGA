@@ -42,10 +42,10 @@ import traceback
 import concurrent.futures
 import uvicorn
 
-
 ##############################################################################
 #                                  REVERIE                                   #
 ##############################################################################
+
 
 class ReverieServer:
     def __init__(self,
