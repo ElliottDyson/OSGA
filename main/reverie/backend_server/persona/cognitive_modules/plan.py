@@ -647,7 +647,7 @@ def _determine_action(persona, maze):
 
   if 1440 - x_emergency > 0: 
     print ("x_emergency__AAA", x_emergency)
-    persona.scratch.f_daily_schedule += [["sleeping", 1440 - x_emergency]]
+  persona.scratch.f_daily_schedule += [["sleeping", 1440 - x_emergency]]
   
 
 
