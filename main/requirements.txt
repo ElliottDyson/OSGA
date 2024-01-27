@@ -6,3 +6,5 @@ pathlib
 requests==2.31.0
 selenium==4.11.2
 translator
+uvicorn
+python-socketio

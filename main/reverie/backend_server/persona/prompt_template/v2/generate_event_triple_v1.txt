@@ -6,25 +6,21 @@ Variables:
 !<INPUT 2>! -- Persona's full name. 
 
 <commentblockmarker>###</commentblockmarker>
-Task: Turn the input into (subject, predicate, object). 
+Convert each input sentence to a structured format that captures the essence of the action by identifying the subject, predicate, and object. Your response should strictly adhere to the (subject, predicate, object) format, without any additional explanations or corrections. If a sentence includes multiple objects or complex actions, choose the primary action and its direct object.
 
-Input: Sam Johnson is eating breakfast.
-Output: ("Dolores Murphy", "eat", "breakfast")
----
-Input: Joon Park is brewing coffee.
-Output: ("Joon Park", "brew", "coffee")
----
-Input: Jane Cook is sleeping.
-Output: ("Jane Cook", "is", "sleep")
----
-Input: Michael Bernstein is writing email on a computer.
-Output: ("Michael Bernstein", "write", "email")
----
-Input: Percy Liang is teaching students in a classroom.
-Output: ("Percy Liang", "teach", "students")
----
-Input: Merrie Morris is running on a treadmill.
-Output: ("Merrie Morris", "run", "treadmill")
----
-Input: !<INPUT 0>! is !<INPUT 1>!. 
-Output: ("!<INPUT 2>!",
+Rules:
+
+Subject: The main actor in the sentence.
+Predicate: The action verb, simplified to its base form.
+Object: The primary direct object of the action. If there are multiple objects, select the one most directly associated with the action. If there is no direct object, use None.
+Output Format:
+Provide your answer as a tuple in the format: (subject, predicate, object). The output should be concise and limited to this tuple only.
+
+Example:
+Input: "Klaus Mueller packs a laptop and a notebook into his backpack."
+Output: ("Klaus Mueller", "pack", "laptop")
+
+Note: Focus solely on the primary elements of each sentence. Additional details such as secondary objects, locations, or methods should not be included in your response.
+         
+Input: !<INPUT 0>! is !<INPUT 1>!  
+Output: 

@@ -14,6 +14,9 @@ import traceback
 import logging
 import time
 from utils import *
+# this saves the output to a file. comment out if you don't want to save to a file
+from .output import *
+import ast
 
 debug_level = debug_run_gpt_prompt # Set in utils.py
 logging.basicConfig(level=debug_level)
@@ -77,6 +80,40 @@ def adjust_durations(tasks, total_allowed):
             i = (i + 1) % len(adjusted_tasks)
 
     return adjusted_tasks
+
+def parse_triplets(gpt_response):
+    # Assigning the elements of the tuple to variables
+    # Regular expression to match a tuple at the start of the response
+    tuple_regex = r'\(([^)]+)\)'
+
+    # Find the tuple part of the response
+    match = re.search(tuple_regex, gpt_response.replace("\"", "").replace("\'", ""))
+
+    if match:
+        # Extract the matched content
+        tuple_content = match.group(1)
+        
+        # Split the content by commas to get individual elements
+        elements = tuple_content.split(', ')
+        
+        # Process each element, treating 'None' specially
+        parsed_elements = []
+        for element in elements:
+            element = element.strip()
+            if element == 'None':
+                parsed_elements.append("")
+            else:
+                # Keep other elements as strings
+                parsed_elements.append(element)
+        
+        # Return the parsed elements
+        if len(parsed_elements) == 3:
+          return [parsed_elements[1], parsed_elements[2]]
+        else:
+          return []
+    else:
+        print("No valid tuple found in the response.")
+        return []
 
 def extract_quoted_text(gpt_response, default=""):
     # The regular expression now matches text inside double quotes ("") or single quotes ('')
@@ -314,7 +351,7 @@ def run_gpt_prompt_generate_hourly_schedule(persona,
     return prompt_input
 
   def __func_clean_up(gpt_response, prompt=""):
-    cr = gpt_response.strip()
+    cr = gpt_response.strip().lower()
     if cr[-1] == ".":
       cr = cr[:-1]
     return cr
@@ -421,13 +458,14 @@ def run_gpt_prompt_task_decomp(persona,
     prompt_input += [curr_time_range]
     prompt_input += [duration]
     prompt_input += [persona.scratch.get_str_firstname()]
+
     return prompt_input
 
   def __func_clean_up(gpt_response, duration):
     pattern = r"\d+[\.\)]\s*(.+?)\s*\(duration in minutes:\s*(\d+),\s*minutes left:\s*\d+\)"
 
     parsed_data = re.findall(pattern, gpt_response)
-    formatted_data = [[task, int(duration)] for task, duration in parsed_data]
+    formatted_data = [[task.strip().lower(), int(duration)] for task, duration in parsed_data]
 
     total_expected_min = int(duration)
     
@@ -451,6 +489,7 @@ def run_gpt_prompt_task_decomp(persona,
 
   for attempt in range(max_retries): # Generating response, trying to clean up response, if clean up fails it tries again until max_retries is reached
       try:
+          #TODO: fails
           output = generate_response(prompt, gpt_param)
           output = __func_clean_up(output, duration)
           #TODO: Maybe check times
@@ -650,9 +689,6 @@ def run_gpt_prompt_action_arena(action_description,
 
     prompt_input += [accessible_arena_str]
 
-    prompt_input = []
-    prompt_input += [action_description]
-    prompt_input += [accessible_arena_str]
     
     # prompt_input += [maze.access_tile(persona.scratch.curr_tile)["arena"]]
     # x = f"{maze.access_tile(persona.scratch.curr_tile)['world']}:{maze.access_tile(persona.scratch.curr_tile)['sector']}:{maze.access_tile(persona.scratch.curr_tile)['arena']}"
@@ -836,15 +872,7 @@ def run_gpt_prompt_event_triple(action_description, persona, verbose=False):
     return prompt_input
   
   def __func_clean_up(gpt_response, prompt=""):
-    # The regular expression matches all text inside double quotes ("") or single quotes ('')
-    matches = re.findall(r'"(.*?)"|\'(.*?)\'', gpt_response, re.DOTALL)
-    if matches:
-        # Extracting all matched groups, considering both double and single quotes
-        all_quotes = [match[0] or match[1] for match in matches]
-        return all_quotes
-    else:
-        # If no quotes are found, return the original gpt_response
-        return (persona.name, "is", "idle")
+    return parse_triplets(gpt_response)
 
   def get_fail_safe(persona): 
     fs = (persona.name, "is", "idle")
@@ -887,23 +915,31 @@ def run_gpt_prompt_event_triple(action_description, persona, verbose=False):
 
 def run_gpt_prompt_act_obj_desc(act_game_object, act_desp, persona, verbose=False): 
   def create_prompt_input(act_game_object, act_desp, persona): 
-    prompt_input = [act_game_object, 
-                    persona.name,
+    prompt_input = [persona.name,
                     act_desp,
-                    act_game_object,
                     act_game_object]
     return prompt_input
   
   def __func_clean_up(gpt_response, prompt=""):
-    cr = gpt_response.strip()
-    if cr[-1] == ".": cr = cr[:-1]
-    return cr
+    sentence = gpt_response.strip().lower()
+    # Regular expression pattern to check for case-insensitive 'Output:' at the start
+    pattern = r"^(output:)\s*(.*)"
+    
+    # Matching the sentence with the pattern, case-insensitive
+    match = re.match(pattern, sentence, re.IGNORECASE)
+    
+    if match:
+        # Return the part of the sentence after "Output:"
+        return match.group(2).strip()
+    else:
+        # Return the original sentence if it doesn't start with "Output:" in any case
+        return sentence
 
   def get_fail_safe(act_game_object): 
     fs = f"{act_game_object} is idle"
     return fs
 
-  gpt_param = {"engine": "gpt-3.5-turbo-1106", "max_tokens": 100, 
+  gpt_param = {"engine": "gpt-3.5-turbo-1106", "max_tokens": 30, 
                "temperature": 0.2, "top_p": 0.1, "stream": False,
                "frequency_penalty": 0, "presence_penalty": 0, "stop": ["\n"]}
   prompt_template = "persona/prompt_template/v2/generate_obj_event_v1.txt"
@@ -938,20 +974,11 @@ def run_gpt_prompt_act_obj_desc(act_game_object, act_desp, persona, verbose=Fals
 def run_gpt_prompt_act_obj_event_triple(act_game_object, act_obj_desc, persona, verbose=False): 
   def create_prompt_input(act_game_object, act_obj_desc): 
     prompt_input = [act_game_object, 
-                    act_obj_desc,
-                    act_game_object]
+                    act_obj_desc]
     return prompt_input
   
   def __func_clean_up(gpt_response, prompt=""):
-    # The regular expression matches all text inside double quotes ("") or single quotes ('')
-    matches = re.findall(r'"(.*?)"|\'(.*?)\'', gpt_response, re.DOTALL)
-    if matches:
-        # Extracting all matched groups, considering both double and single quotes
-        all_quotes = [match[0] or match[1] for match in matches]
-        return all_quotes
-    else:
-        # If no quotes are found, return the original gpt_response
-        return (act_game_object, "is", "idle")
+    return parse_triplets(gpt_response)
 
   def get_fail_safe(act_game_object): 
     fs = (act_game_object, "is", "idle")
@@ -1047,7 +1074,7 @@ def run_gpt_prompt_new_decomp_schedule(persona,
   
   def __func_clean_up(gpt_response, prompt=""):
     new_schedule = prompt + " " + gpt_response.strip()
-    new_schedule = new_schedule.split("The revised schedule:")[-1].strip().replace("</s>", "")
+    new_schedule = new_schedule.split("The revised schedule:")[-1].strip().replace("</s>", "").lower()
 
     # Strict regular expression pattern to extract only valid schedule lines
     strict_pattern = r'^\d{2}:\d{2} ~ \d{2}:\d{2} -- .+?\(.*?\)$'
@@ -1066,7 +1093,8 @@ def run_gpt_prompt_new_decomp_schedule(persona,
 
         # Calculate duration in minutes
         duration = abs(int((end_time - start_time).total_seconds() / 60))
-        tasks.append([task, duration])
+        if duration != 0:
+          tasks.append([task.strip().lower(), duration])
 
     return tasks
 
@@ -1339,7 +1367,7 @@ def run_gpt_prompt_decide_to_react(persona, target_persona, retrieved,test_input
 
   for attempt in range(max_retries): # Generating response, trying to clean up response, if clean up fails it tries again until max_retries is reached
       try:
-          
+          #TODO: FAILS SOMETIMES
           print("run_gpt_prompt_decide_to_react")
           output = generate_response(prompt, gpt_param)
           if output.split("Answer: Option")[-1].strip().lower() not in ["3", "2", "1"]: 
