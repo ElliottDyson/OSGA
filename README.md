@@ -42,10 +42,29 @@ base_api_url = "http://localhost:8000/v1"  # If the model resides on the same sy
 
 1. **Setup**: Execute the `install requirements.bat` file. This will handle all necessary Python dependencies.
 2. **Launching**: Activate the servers (both frontend and backend) by running `start.bat`.
-3. **Simulation Selection**: When prompted, input the name of a pre-existing simulation (corresponding to a folder name) located at `OSGA\main\environment\frontend_server\storage`. This becomes the genesis point for your simulation.
-4. **Fork Naming**: Specify a unique name for your fork. This name will represent your simulation in the storage directory.
-5. **Simulation Duration**: To dictate the duration of your simulation, use commands like `run 6000`. Here, the integer represents steps, where 1 in-game hour equates to 360 steps.
-6. **Continuation**: If you wish to extend a paused simulation, initiate a new fork from your previous state. This requires terminating the prior frontend and backend processes and then launching fresh ones.
+3. **Manual Startup**: Before starting the simulation, you need to manually launch the frontend and backend servers. Open your command prompt or terminal and navigate to the respective directories.
+
+   - Start the frontend server by running:
+     ```
+     cd environment\frontend_server
+     python manage.py runserver
+     ```
+
+   - For the backend server, it consists of two parts. First, start the socket server using the following command:
+     ```
+     cd reverie\backend_server
+     python reverie.py
+     ```
+
+     Next, you can use the client to pass in commands to the backend:
+     ```
+     cd reverie\backend_server
+     python client.py
+     ```
+4. **Simulation Selection**: When prompted, input the name of a pre-existing simulation (corresponding to a folder name) located at `OSGA\main\environment\frontend_server\storage`. This becomes the genesis point for your simulation.
+5. **Fork Naming**: Specify a unique name for your fork. This name will represent your simulation in the storage directory.
+6. **Simulation Duration**: To dictate the duration of your simulation, use commands like `run 6000`. Here, the integer represents steps, where 1 in-game hour equates to 360 steps.
+7. **Continuation**: If you wish to extend a paused simulation, initiate a new fork from your previous state. This requires terminating the prior frontend and backend processes and then launching fresh ones.
 
 **Important Notes**:
 - Upon executing, grant the frontend sufficient time to load. Initial actions by the personas might cause minor delays.
@@ -85,4 +104,4 @@ Embarking on a project and seeking inspiration? Here are some avenues to explore
 
 - **The Horizon is Limitless**: Our platform is a canvas, and we eagerly anticipate the masterpieces you'll conceive.
 
-Authored By: Elliott Dyson
+Authored By: Elliott Dyson, Abhijeet Malamkar
