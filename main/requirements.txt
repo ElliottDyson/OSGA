@@ -1,10 +1,12 @@
 datetime
 django
 numpy==1.25.1
-openai==0.27.9
+openai==1.12.0
 pathlib
 requests==2.31.0
 selenium==4.11.2
 translator
 uvicorn
 python-socketio
+tenacity
+aiohttp
