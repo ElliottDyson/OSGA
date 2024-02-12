@@ -66,4 +66,4 @@ start cmd.exe /K "call conda activate %CONDA_ENV_NAME% && title OSGA Backend Ser
 timeout /T 2 /NOBREAK
 
 :: Navigate to the reverie/backend_server directory and run it in a new terminal with a custom title
-start cmd.exe /K "call conda activate %CONDA_ENV_NAME% && title OSGA Backend Server && cd %cd%\reverie\backend_server && python client.py"
+start cmd.exe /K "call conda activate %CONDA_ENV_NAME% && title OSGA Backend Command Server && cd %cd%\reverie\backend_server && python client.py"
