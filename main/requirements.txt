@@ -1,5 +1,7 @@
 datetime
 django
+django-cors-headers
+django-storages
 numpy==1.25.1
 openai==1.12.0
 pathlib
