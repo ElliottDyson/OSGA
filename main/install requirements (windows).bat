@@ -12,7 +12,7 @@ set REQUIREMENTS_PATH=requirements.txt
 
 :: Check for Conda installation
 if not exist "%CONDA_EXE%" (
-    echo Conda is not installed. Please install Conda before proceeding.
+    echo Conda is not installed. Please install miniconda3 before proceeding.
     goto End
 )
 
