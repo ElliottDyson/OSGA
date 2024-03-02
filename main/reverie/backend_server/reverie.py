@@ -41,7 +41,7 @@ import asyncio
 import traceback
 import concurrent.futures
 import uvicorn
-
+import threading
 ##############################################################################
 #                                  REVERIE                                   #
 ##############################################################################
@@ -521,34 +521,7 @@ class ReverieServer:
         print("constructs powered by generative agents architecture and LLM. We")
         print("clarify that these agents lack human-like agency, consciousness,")
         print("and independent decision-making.\n---")
-
-        # Create a new Socket.IO server
-        sio = socketio.AsyncServer(async_mode='asgi')
-        app = socketio.ASGIApp(sio)
-
-        # Handle connection
-        @sio.event
-        async def connect(sid, environ):
-            print('Client connected', sid)
-
-        # Handle disconnection
-        @sio.event
-        async def disconnect(sid):
-            print('Client disconnected', sid)
-
-        # Define events for different commands
-        @sio.event
-        async def process_command(sid, data):
-            try:
-                # Process the command received from client
-                ret_str = self.run_command(data)
-                await sio.emit('response', ret_str, room=sid)
-            except Exception as e:
-                traceback.print_exc()
-                await sio.emit('error', 'Error occurred.', room=sid)
-
-        # Start the server
-        uvicorn.run(app, host="0.0.0.0", port=5000)
+        
 
     def run_command(self, sim_command):
 
@@ -734,8 +707,46 @@ if __name__ == '__main__':
     #                    "July1_the_ville_isabella_maria_klaus-step-3-21")
     # rs.open_server()
 
+    sio = socketio.AsyncServer(async_mode='asgi')
+    app = socketio.ASGIApp(sio)
+
+    def create_server():
+        uvicorn.run(app, host="0.0.0.0", port=5000, log_level="critical" )
+
+    thread = threading.Thread(target=create_server)
+    thread.start()
+
+    rs = None
+
     origin = input("Enter the name of the forked simulation: ").strip()
     target = input("Enter the name of the new simulation: ").strip()
-
     rs = ReverieServer(origin, target)
     rs.open_server()
+
+    # Handle connection
+    @sio.event
+    async def connect(sid, environ):
+        print('Client connected', sid)
+
+    # Handle disconnection
+    @sio.event
+    async def disconnect(sid):
+        print('Client disconnected', sid)
+
+    # Define events for different commands
+    @sio.event
+    async def process_command(sid, data):
+        try:
+            # Process the command received from client
+            if rs is None:
+                await sio.emit('error', 'Server not initialized.', room=sid)
+                return
+            ret_str = rs.run_command(data)
+            await sio.emit('response', ret_str, room=sid)
+        except Exception as e:
+            traceback.print_exc()
+            await sio.emit('error', 'Error occurred.', room=sid)
+
+    # Join the thread        
+    thread.join()
+

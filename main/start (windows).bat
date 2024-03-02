@@ -1,5 +1,6 @@
 @echo off
 
+set CONDA_ENV_NAME=llm_3.10
 :: Ask the user if they want to start the llama_cpp.server
 set /P START_SERVER=Do you want to start the llama_cpp.server (y/n)?
 if /I "%START_SERVER%"=="y" goto START_SERVER
@@ -45,7 +46,7 @@ for %%f in (models/*.gguf) do (
 )
 
 :: Run the llama_cpp.server with the selected model, GPU layers, and context length
-start cmd.exe /K "title Llama CPP Server (Local-LLAMA) && py -m llama_cpp.server --model %MODEL_PATH% --n_gpu_layers %GPU_LAYERS% --n_ctx %CTX_LENGTH% --port 8080"
+start cmd.exe /K "call conda activate %CONDA_ENV_NAME% && title Llama CPP Server (Local-LLAMA) && python -m llama_cpp.server --model %MODEL_PATH% --n_gpu_layers %GPU_LAYERS% --n_ctx %CTX_LENGTH% --port 8080"
 
 :: Wait 20s for the model to load
 timeout /T 20 /NOBREAK
@@ -53,13 +54,16 @@ timeout /T 20 /NOBREAK
 :SKIP_SERVER
 
 :: Navigate to the frontend_server directory and run it in a new terminal with a custom title
-start cmd.exe /K "title OSGA Frontend Server && cd %cd%\environment\frontend_server && python manage.py runserver"
+start cmd.exe /K "call conda activate %CONDA_ENV_NAME% && title OSGA Frontend Server && cd %cd%\environment\frontend_server && python manage.py runserver"
 
 :: Wait for 2 seconds before running the next command
 timeout /T 2 /NOBREAK
 
 :: Navigate to the reverie/backend_server directory and run it in a new terminal with a custom title
-start cmd.exe /K "title OSGA Backend Server && cd %cd%\reverie\backend_server && python reverie.py"
+start cmd.exe /K "call conda activate %CONDA_ENV_NAME% && title OSGA Backend Server && cd %cd%\reverie\backend_server && python reverie.py"
+
+:: Wait for 2 seconds before running the next command
+timeout /T 2 /NOBREAK
 
 :: Navigate to the reverie/backend_server directory and run it in a new terminal with a custom title
-start cmd.exe /K "title OSGA Backend Command Server && cd %cd%\reverie\backend_server && python client.py"
+start cmd.exe /K "call conda activate %CONDA_ENV_NAME% && title OSGA Backend Command Server && cd %cd%\reverie\backend_server && python client.py"

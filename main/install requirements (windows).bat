@@ -1,61 +1,71 @@
 @echo off
 
+:: Define the name of your Conda environment and the desired Python version
+set CONDA_ENV_NAME=llm_3.10
+set PYTHON_VERSION=3.10
+
+:: Define the path to the Conda executable and the environment's Python executable
+:: Adjust the base path of Conda if necessary
+set CONDA_EXE=%USERPROFILE%\miniconda3\Scripts\conda.exe
+set ENV_PYTHON_EXE=%USERPROFILE%\miniconda3\envs\%CONDA_ENV_NAME%\python.exe
+set REQUIREMENTS_PATH=requirements.txt
+
+:: Check for Conda installation
+if not exist "%CONDA_EXE%" (
+    echo Conda is not installed. Please install miniconda3 before proceeding: https://docs.anaconda.com/free/miniconda/
+    goto End
+)
+
+:: Create a new Conda environment if it doesn't exist
+if not exist "%ENV_PYTHON_EXE%" (
+    echo Creating a new Conda environment named '%CONDA_ENV_NAME%' with Python %PYTHON_VERSION%...
+    %CONDA_EXE% create --name %CONDA_ENV_NAME% python=%PYTHON_VERSION% -y
+) else (
+    echo Conda environment '%CONDA_ENV_NAME%' already exists.
+)
+
+:: Attempting to uninstall a package in case of a previous installation
 echo Attempting to uninstall llama-cpp-python in case of a previous installation...
-pip uninstall -y llama-cpp-python[server]
+"%ENV_PYTHON_EXE%" -m pip uninstall -y llama-cpp-python[server]
 
-:MENU
-echo.
-echo Please choose the type of device to run on (GPUs are fastest):
-echo [1] AMD GPU
-echo [2] NVIDIA GPU
-echo [3] Intel
-echo [4] CPU
-echo [5] None (Choose if you wish to not run your LLM locally: OpenAI API, Cloud server, etc.,)
-echo.
 
-set /P CHOICE=Enter your choice (1/2/3/4/5): 
-if "%CHOICE%"=="1" goto AMD
-if "%CHOICE%"=="2" goto NVIDIA
-if "%CHOICE%"=="3" goto INTEL
-if "%CHOICE%"=="4" goto CPU
-if "%CHOICE%"=="5" goto NONE
-echo Invalid choice. Please select a valid option.
-goto MENU
+:: Attempt to auto-detect GPU
+for /f "tokens=2 delims==" %%i in ('wmic path win32_VideoController get name /value') do set GPU_NAME=%%i
 
-:AMD
-echo Installing for AMD GPU...
-set CMAKE_ARGS=-DLLAMA_HIPBLAS=on
-set FORCE_CMAKE=1
-pip install llama-cpp-python[server]
-goto END
+echo Detected GPU: %GPU_NAME%
 
-:NVIDIA
-echo Installing for NVIDIA GPU...
-set CMAKE_ARGS=-DLLAMA_CUBLAS=on
-set FORCE_CMAKE=1
-pip install llama-cpp-python[server]
-goto END
+:: Simple keyword-based GPU type detection
+if not x%GPU_NAME:%NVIDIA%=%==x%GPU_NAME% (
+    echo NVIDIA GPU detected.
+    set CMAKE_ARGS=-DLLAMA_CUBLAS=on
+    set FORCE_CMAKE=1
+    "%ENV_PYTHON_EXE%" -m pip install llama-cpp-python[server]
+    goto InstallRequirements
+)
 
-:INTEL
-echo Current unavailable for running directly on windows, please install a Linux distribution such as Ubuntu on WSL (Windows Subsystem for Linux) through the Windows Store, or as its own OS.
-echo.
-echo This window will now exit, please run again if you want to run on CPU, or if you want to use Intel ARC, run the linux script within linux.
-pause
-exit
+if not x%GPU_NAME:%AMD%=%==x%GPU_NAME% (
+    echo AMD GPU detected.
+    set CMAKE_ARGS=-DLLAMA_HIPBLAS=on
+    set FORCE_CMAKE=1
+    "%ENV_PYTHON_EXE%" -m pip install llama-cpp-python[server]
+    goto InstallRequirements
+)
 
-:CPU
-echo Installing for CPU...
+if not x%GPU_NAME:%Intel%=%==x%GPU_NAME% (
+    echo Intel GPU detected. Currently, direct support on Windows is unavailable. Please consider other options.
+    goto InstallRequirements
+)
+
+:: Fallback for CPUs or undetected GPUs
+echo GPU type could not be automatically detected or is not supported. Installing for CPU...
 set CMAKE_ARGS=-DLLAMA_BLAS=on -DLLAMA_BLAS_VENDOR=OpenBLAS
 set FORCE_CMAKE=1
-pip install llama-cpp-python[server]
-goto END
+"%ENV_PYTHON_EXE%" -m pip install llama-cpp-python[server]
 
-:NONE
-echo Skipping llama-cpp-python Installation
-goto END
-
-:END
+:InstallRequirements
 echo Installing necessary requirements...
-pip install -r requirements.txt
+"%ENV_PYTHON_EXE%" -m pip install -r requirements.txt
 echo Installation process complete.
+
+:End
 pause
